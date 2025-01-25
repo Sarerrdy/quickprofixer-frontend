@@ -7,6 +7,8 @@ import DescriptionTab from './DescriptionTab';
 import FilesTab from './FilesTab';
 import LocationTab from './LocationTab';
 import PreviewTab from './PreviewTab';
+import FixerList from '../fixers/FixerList';
+import { useFetch } from '../../../api/hooks/useApi'; // Import the useFetch hook
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -32,6 +34,27 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index, ...other })
   );
 };
 
+interface Fixer {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  specializations: string;
+  certifications?: string;
+  verificationDocument: string;
+  isVerified: boolean;
+  rating: number;
+  location: string;
+  isAvailable: boolean;
+  reviews: string;
+  experienceYears: number;
+  portfolio: string;
+  rateType: string;
+  rate: number;
+}
+
 const TabsControl: React.FC = () => {
   const [value, setValue] = useState(0);
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
@@ -49,8 +72,20 @@ const TabsControl: React.FC = () => {
   const [country, setCountry] = useState('');
   const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [manualLocation, setManualLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [showFixers, setShowFixers] = useState(false);
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
+  // const { data: fixers, isLoading, error } = useFetch<Fixer[]>('fixers', '/fixer'); // Fetch fixers data
+  const skillCategory = 'Plumbing';
+  const location = 'Portharcourt';
+  const minRating = 4;
+
+  const { data: fixers, isLoading, error } = useFetch<Fixer[]>(
+    ['fixers', skillCategory, location, minRating],
+    '/fixer/search',
+    { skillCategory, location, minRating }
+  );
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     if (newValue <= value) {
@@ -76,6 +111,10 @@ const TabsControl: React.FC = () => {
       setNewLinkTitle('');
       setNewLinkUrl('');
     }
+  };
+
+  const handleFindFixers = () => {
+    setShowFixers(true);
   };
 
   const labels = ["Search services", "Date", "Description", "Supporting files", "Location", "Preview"];
@@ -151,6 +190,12 @@ const TabsControl: React.FC = () => {
           lga={lga}
           country={country}
         />
+        <Button variant="contained" color="primary" onClick={handleFindFixers} sx={{ mt: 2 }}>
+          Find Fixers Now
+        </Button>
+        {showFixers && !isLoading && !error && <FixerList fixers={fixers} />}
+        {isLoading && <Typography>Loading...</Typography>}
+        {error && <Typography>Error loading fixers</Typography>}
       </TabPanel>
       <Box sx={{ display: 'flex', justifyContent: { xs: 'center', sm: 'flex-start' }, mt: 2, gap: 1 }}>
         <Button variant="contained" color="primary" onClick={handlePrevious} disabled={value === 0}>
@@ -161,7 +206,7 @@ const TabsControl: React.FC = () => {
             Next
           </Button>
         ) : (
-          <Button variant="contained" color="primary">
+          <Button variant="contained" color="primary" onClick={handleFindFixers}>
             Find Fixers Now
           </Button>
         )}
