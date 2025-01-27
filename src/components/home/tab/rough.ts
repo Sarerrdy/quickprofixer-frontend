@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { FormControl, FormControlLabel, Radio, RadioGroup, Box, Button, Typography, IconButton } from '@mui/material';
+import { FormControl, FormControlLabel, Radio, RadioGroup, Box, Typography, IconButton, Button } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import AddressForm from './AddressForm';
 import MapComponent from './MapComponent';
 import { useFetch } from '../../../api/hooks/useApi';
 
+// Extend the Window interface to include the google and initMap properties
 declare global {
   interface Window {
     google: any;
@@ -12,6 +13,9 @@ declare global {
   }
 }
 
+/**
+ * Props for the LocationTab component
+ */
 interface LocationTabProps {
   newAddress: string;
   setNewAddress: (address: string) => void;
@@ -29,6 +33,10 @@ interface LocationTabProps {
   setManualLocation: (location: { lat: number; lng: number } | null) => void;
 }
 
+/**
+ * LocationTab component allows users to select and confirm their location.
+ * It supports using the current location, a registered address, or a manually entered address.
+ */
 const LocationTab: React.FC<LocationTabProps> = ({
   newAddress,
   setNewAddress,
@@ -47,12 +55,11 @@ const LocationTab: React.FC<LocationTabProps> = ({
 }) => {
   const [locationOption, setLocationOption] = useState('registered');
   const [locationError, setLocationError] = useState<string | null>(null);
-  const [mapError, setMapError] = useState<string | null>(null);
 
   // Fetch the registered address when the "registered" option is selected
   const { data: registeredAddress, error: fetchError } = useFetch(
-    ['address', 1],
-    '/address/1',
+    ['address', 6],
+    '/address/6',
     {},
     { enabled: locationOption === 'registered' }
   );
@@ -68,43 +75,43 @@ const LocationTab: React.FC<LocationTabProps> = ({
     }
   }, [locationOption, registeredAddress]);
 
+  /**
+   * Handles the change of location option (current, registered, new).
+   * @param event - The change event from the radio buttons.
+   */
   const handleLocationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setLocationOption((event.target as HTMLInputElement).value);
   };
 
+  /**
+   * Checks if the provided latitude and longitude have sufficient precision.
+   * @param lat - The latitude to check.
+   * @param lng - The longitude to check.
+   * @returns True if both latitude and longitude have more than 8 decimal places.
+   */
   const isPreciseLocation = (lat: number, lng: number) => {
     const latPrecision = lat.toString().split('.')[1]?.length || 0;
     const lngPrecision = lng.toString().split('.')[1]?.length || 0;
     return latPrecision > 8 && lngPrecision > 8;
   };
 
-  const handleConfirmLocation = () => {
-    if (locationOption === 'current') {
-      if (currentLocation) {
-        if (isPreciseLocation(currentLocation.lat, currentLocation.lng)) {
-          getAddressFromCoordinates(currentLocation.lat, currentLocation.lng);
-        } else {
-          console.warn('Current location is not precise enough. Falling back to manual location.');
-          if (manualLocation) {
-            getAddressFromCoordinates(manualLocation.lat, manualLocation.lng);
-          } else {
-            console.error('Manual location is not available.');
-            setLocationError('Manual location is not available.');
-          }
-        }
-      } else {
-        console.error('No valid location option selected.');
-        setLocationError('No valid location option selected.');
-      }
-    }
-  };
-
+  /**
+   * Fetches a human-readable address from a plus code.
+   * @param plusCode - The plus code to convert.
+   * @returns The human-readable address or the original plus code if conversion fails.
+   */
   const getHumanReadableAddress = async (plusCode: string) => {
     const response = await fetch(`https://plus.codes/api?address=${plusCode}`);
     const data = await response.json();
     return data.plus_code?.compound_code || plusCode;
   };
 
+  /**
+   * Fetches the address from the provided latitude and longitude coordinates.
+   * Updates the state with the formatted address and other address components.
+   * @param lat - The latitude of the location.
+   * @param lng - The longitude of the location.
+   */
   const getAddressFromCoordinates = async (lat: number, lng: number) => {
     const geocoder = new window.google.maps.Geocoder();
     const latlng = { lat, lng };
@@ -122,6 +129,7 @@ const LocationTab: React.FC<LocationTabProps> = ({
         if (plusCode) {
           humanReadablePlusCode = await getHumanReadableAddress(plusCode);
         }
+        // Use formattedAddress for more useful information
         const address = formattedAddress || `${humanReadablePlusCode}, ${locality}, ${administrativeArea}, ${country}`.trim();
         setNewAddress(address);
         setTown(locality);
@@ -135,15 +143,28 @@ const LocationTab: React.FC<LocationTabProps> = ({
     });
   };
 
+  /**
+   * Effect hook to get the current location when the component mounts or the location option changes.
+   * It uses the browser's geolocation API to get the current position.
+   */
   useEffect(() => {
     if (locationOption === 'current') {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (position) => {
-            setCurrentLocation({
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            });
+            const { latitude, longitude } = position.coords;
+            if (isPreciseLocation(latitude, longitude)) {
+              setCurrentLocation({ lat: latitude, lng: longitude });
+              getAddressFromCoordinates(latitude, longitude);
+            } else {
+              console.warn('Current location is not precise enough. Falling back to manual location.');
+              if (manualLocation) {
+                setCurrentLocation(manualLocation);
+                getAddressFromCoordinates(manualLocation.lat, manualLocation.lng);
+              } else {
+                console.error('Manual location is not available.');
+              }
+            }
             setLocationError(null);
           },
           (error) => {
@@ -159,11 +180,27 @@ const LocationTab: React.FC<LocationTabProps> = ({
     }
   }, [locationOption]);
 
-  useEffect(() => {
-    if (locationOption === 'current') {
-      handleConfirmLocation();
+  /**
+   * Confirms the selected location and fetches the address from coordinates.
+   */
+  const refreshMap = () => {
+    if (locationOption === 'current' && currentLocation) {
+      if (isPreciseLocation(currentLocation.lat, currentLocation.lng)) {
+        getAddressFromCoordinates(currentLocation.lat, currentLocation.lng);
+      } else {
+        console.warn('Current location is not precise enough. Falling back to manual location.');
+        if (manualLocation) {
+          getAddressFromCoordinates(manualLocation.lat, manualLocation.lng);
+        } else {
+          console.error('Manual location is not available.');
+        }
+      }
+    } else if (locationOption === 'new' && manualLocation) {
+      getAddressFromCoordinates(manualLocation.lat, manualLocation.lng);
+    } else {
+      console.error('No valid location option selected.');
     }
-  }, [locationOption, currentLocation, manualLocation]);
+  };
 
   return (
     <Box>
@@ -181,7 +218,7 @@ const LocationTab: React.FC<LocationTabProps> = ({
       <Typography variant="h6" gutterBottom>
         Full Address: {newAddress}
         {locationOption === 'current' && (
-          <IconButton onClick={handleConfirmLocation} aria-label="refresh" size="small">
+          <IconButton onClick={refreshMap} aria-label="refresh" size="small">
             <RefreshIcon />
           </IconButton>
         )}
@@ -205,10 +242,13 @@ const LocationTab: React.FC<LocationTabProps> = ({
           currentLocation={currentLocation}
           manualLocation={manualLocation}
           setManualLocation={setManualLocation}
-          onError={(error) => setMapError(error)}
         />
       )}
-      {mapError && <Typography color="error">{mapError}</Typography>}
+      {(locationOption === 'current' || locationOption === 'new') && (
+        <Button variant="contained" color="primary" onClick={refreshMap} sx={{ mt: 2 }}>
+          Confirm Location
+        </Button>
+      )}
     </Box>
   );
 };

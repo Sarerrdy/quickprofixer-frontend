@@ -1,4 +1,5 @@
 import React from 'react';
+import { useForm, Controller } from 'react-hook-form';
 import { TextField, Box } from '@mui/material';
 
 interface AddressFormProps {
@@ -26,47 +27,103 @@ const AddressForm: React.FC<AddressFormProps> = ({
   country,
   setCountry,
 }) => {
+  const { control, trigger, formState: { errors } } = useForm({
+    defaultValues: {
+      newAddress: newAddress || '',
+      landmark: landmark || '',
+      town: town || '',
+      lga: lga || '',
+      country: country || '',
+    },
+  });
+
+  const handleBlur = async (field: string) => {
+    await trigger(field);
+  };
+
   return (
     <Box component="form" sx={{ mt: 2 }}>
-      <TextField
-        label="Address"
-        variant="outlined"
-        fullWidth
-        margin="normal"
-        value={newAddress}
-        onChange={(e) => setNewAddress(e.target.value)}
+      <Controller
+        name="newAddress"
+        control={control}
+        rules={{ required: 'Address is required' }}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="Address"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            error={!!errors.newAddress}
+            helperText={errors.newAddress ? errors.newAddress.message : ''}
+            onBlur={() => handleBlur('newAddress')}
+          />
+        )}
       />
-      <TextField
-        label="Nearest Landmark"
-        variant="outlined"
-        fullWidth
-        margin="normal"
-        value={landmark}
-        onChange={(e) => setLandmark(e.target.value)}
+      <Controller
+        name="landmark"
+        control={control}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="Nearest Landmark"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            onBlur={() => handleBlur('landmark')}
+          />
+        )}
       />
-      <TextField
-        label="Town"
-        variant="outlined"
-        fullWidth
-        margin="normal"
-        value={town}
-        onChange={(e) => setTown(e.target.value)}
+      <Controller
+        name="town"
+        control={control}
+        rules={{ required: 'Town is required' }}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="Town"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            error={!!errors.town}
+            helperText={errors.town ? errors.town.message : ''}
+            onBlur={() => handleBlur('town')}
+          />
+        )}
       />
-      <TextField
-        label="LGA"
-        variant="outlined"
-        fullWidth
-        margin="normal"
-        value={lga}
-        onChange={(e) => setLga(e.target.value)}
+      <Controller
+        name="lga"
+        control={control}
+        rules={{ required: 'LGA is required' }}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="LGA"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            error={!!errors.lga}
+            helperText={errors.lga ? errors.lga.message : ''}
+            onBlur={() => handleBlur('lga')}
+          />
+        )}
       />
-      <TextField
-        label="Country"
-        variant="outlined"
-        fullWidth
-        margin="normal"
-        value={country}
-        onChange={(e) => setCountry(e.target.value)}
+      <Controller
+        name="country"
+        control={control}
+        rules={{ required: 'Country is required' }}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="Country"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            error={!!errors.country}
+            helperText={errors.country ? errors.country.message : ''}
+            onBlur={() => handleBlur('country')}
+          />
+        )}
       />
     </Box>
   );

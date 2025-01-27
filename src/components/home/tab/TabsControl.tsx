@@ -23,7 +23,7 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index, ...other })
       hidden={value !== index}
       id={`tabpanel-${index}`}
       aria-labelledby={`tab-${index}`}
-      {...other}
+      {...other }
     >
       {value === index && (
         <Box p={3} className="py-20 px-4 mx-auto">
@@ -73,18 +73,21 @@ const TabsControl: React.FC = () => {
   const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [manualLocation, setManualLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [showFixers, setShowFixers] = useState(false);
+  const [serviceType, setServiceType] = useState(''); // Add state for service type
+  const [serviceTypeId, setServiceTypeId] = useState<number | null>(null); // Add state for service type ID
+  const [searchTerm, setSearchTerm] = useState(''); // Add state for search term
+  const [fetchFixers, setFetchFixers] = useState(false); // Add state to control fetch
+  const [addressId, setAddressId] = useState<number | null>(1); // Add state for address ID
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
-  // const { data: fixers, isLoading, error } = useFetch<Fixer[]>('fixers', '/fixer'); // Fetch fixers data
-  const skillCategory = 'Plumbing';
-  const location = 'Portharcourt';
   const minRating = 4;
 
   const { data: fixers, isLoading, error } = useFetch<Fixer[]>(
-    ['fixers', skillCategory, location, minRating],
-    '/fixer/search',
-    { skillCategory, location, minRating }
+    fetchFixers ? ['fixers', serviceType, town, minRating] : ['fixers'],
+    fetchFixers ? '/fixer/search' : '',
+    fetchFixers ? { skillCategory: serviceType, location: town, minRating } : {},
+    { enabled: fetchFixers } // Enable fetch only when fetchFixers is true
   );
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -114,10 +117,28 @@ const TabsControl: React.FC = () => {
   };
 
   const handleFindFixers = () => {
+    setFetchFixers(true); // Set fetchFixers to true to trigger the fetch
     setShowFixers(true);
   };
 
   const labels = ["Search services", "Date", "Description", "Supporting files", "Location", "Preview"];
+
+  const previewData = {
+    serviceType,
+    selectedDate,
+    title,
+    description,
+    image,
+    document,
+    links,
+    address: newAddress,
+    landmark,
+    town,
+    lga,
+    country,
+    serviceTypeId,
+    addressId,
+  };
 
   return (
     <Box sx={{ width: '100%', maxWidth: '1200px', mx: 'auto', px: { xs: 2, sm: 4 } }}>
@@ -135,7 +156,7 @@ const TabsControl: React.FC = () => {
       </Tabs>
       <TabProgressBar value={value} labels={labels} />
       <TabPanel value={value} index={0}>
-        <SearchSection />
+        <SearchSection searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSelectService={(name, id) => { setServiceType(name); setServiceTypeId(id); }} />
       </TabPanel>
       <TabPanel value={value} index={1}>
         <DateTab selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
@@ -173,11 +194,13 @@ const TabsControl: React.FC = () => {
           setCurrentLocation={setCurrentLocation}
           manualLocation={manualLocation}
           setManualLocation={setManualLocation}
+          addressId={addressId}
+          setAddressId={setAddressId}
         />
       </TabPanel>
       <TabPanel value={value} index={5}>
         <PreviewTab
-          serviceType="Service Type" // Replace with actual service type
+          serviceType={serviceType} // Pass the selected service type
           selectedDate={selectedDate}
           title={title}
           description={description}
@@ -189,11 +212,10 @@ const TabsControl: React.FC = () => {
           town={town}
           lga={lga}
           country={country}
-        />
-        <Button variant="contained" color="primary" onClick={handleFindFixers} sx={{ mt: 2 }}>
-          Find Fixers Now
-        </Button>
-        {showFixers && !isLoading && !error && <FixerList fixers={fixers} />}
+        />       
+        {showFixers && !isLoading && !error && (
+          <FixerList fixers={fixers} previewData={previewData} clientId="client-id" /> // Pass previewData and clientId
+        )}
         {isLoading && <Typography>Loading...</Typography>}
         {error && <Typography>Error loading fixers</Typography>}
       </TabPanel>
