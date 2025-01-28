@@ -1,11 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { usePost } from '../../api/hooks/useApi';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isAuthenticated, logout } = useAuth();
+
+  useEffect(() => {
+    // This effect will run whenever the isAuthenticated state changes
+    console.log('Authentication state changed:', isAuthenticated);
+  }, [isAuthenticated]);
+
+  const logoutMutation = usePost('/auth/logout', {
+    onSuccess: () => {
+      localStorage.removeItem('token');
+      logout();
+    }
+  });
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleLogout = () => {
+    logoutMutation.mutate({});
   };
 
   return (
@@ -24,7 +43,14 @@ const Header: React.FC = () => {
           <Link to="/about" className="text-gray-700 block lg:inline-block">About</Link>
           <Link to="/services" className="text-gray-700 block lg:inline-block">Services</Link>
           <Link to="/contact" className="text-gray-700 block lg:inline-block">Contact</Link>
-          <Link to="/login" className="text-gray-700 block lg:inline-block">Login/Register</Link>
+          {isAuthenticated ? (
+            <>
+              <Link to="/profile" className="text-gray-700 block lg:inline-block">Profile</Link>
+              <button onClick={handleLogout} className="text-gray-700 block lg:inline-block">Logout</button>
+            </>
+          ) : (
+            <Link to="/login" className="text-gray-700 block lg:inline-block">Login</Link>
+          )}
         </nav>
       </div>
     </header>

@@ -1,13 +1,21 @@
 import React from 'react';
-import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import HomePage from './pages/home/HomePage';
-import LoginPage from './pages/auth/LoginPage';
+import LoginForm from './pages/account/LoginForm';
+import RegisterForm from './pages/account/RegisterForm';
+import FixerProfile from './pages/fixer/FixerProfile';
+import CreateProfile from './pages/account/CreateProfile'; // Import the CreateProfile component
+import Header from './components/layout/Header';
 
 const AppRoutes: React.FC = () => (
   <BrowserRouter>
+    {/* <Header /> Ensure Header is within the BrowserRouter */}
     <Routes>
-      <Route path="/"  element={<HomePage />} />    
-      <Route path="/login" element={<Navigate to="/login" />} />
+      <Route path="/" element={<HomePage />} />
+      <Route path="/login" element={<LoginForm />} />
+      <Route path="/register" element={<RegisterForm />} />
+      <Route path="/fixer/profile" element={<FixerProfile />} />
+      <Route path="/create-profile" element={<CreateProfile />} /> {/* Add the CreateProfile route */}
     </Routes>
   </BrowserRouter>
 );
