@@ -28,7 +28,7 @@ QuickProFixer is a web application that connects clients with professional fixer
 
 ## Project Structure
 
-````plaintext
+```plaintext
 quickprofixer-frontend/
 ├── .gitignore
 ├── [index.html](http://_vscodecontentref_/0)
@@ -96,6 +96,7 @@ quickprofixer-frontend/
 ├── [tsconfig.node.json](http://_vscodecontentref_/6)
 ├── [vite.config.ts](http://_vscodecontentref_/7)
 └── [vite.config.ts.timestamp-1735825112698-806d40d5d199a.mjs](http://_vscodecontentref_/8)
+```
 
 ## Getting Started
 
@@ -114,10 +115,13 @@ Ensure you have the following installed on your machine:
 git clone https://github.com/your-username/quickprofixer-frontend.git
 cd quickprofixer-frontend
 
+```
+
 2. Install dependencies:
+
 ```sh
 npm install
-
+```
 
 ### Running the Application
 
@@ -125,16 +129,17 @@ npm install
 
 ```sh
 npm run dev
+```
 
 2. Open your browser and navigate to http://localhost:5173.
 
-
 ## Configuration
+
 The application uses environment variables for configuration. Create a .env file in the src directory with the following content:
 
 ```sh
 VITE_API_BASE_URL=http://localhost:5199/api
-
+```
 
 ## Available Scripts
 
@@ -150,5 +155,3 @@ Contributions are welcome! Please read the contributing guidelines for more info
 ## License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
-
-````
