@@ -112,7 +112,7 @@ Ensure you have the following installed on your machine:
 1. Clone the repository:
 
 ```sh
-git clone https://github.com/your-username/quickprofixer-frontend.git
+git clone https://github.com/Sarerrdy/quickprofixer-frontend.git
 cd quickprofixer-frontend
 
 ```
