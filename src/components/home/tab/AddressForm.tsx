@@ -37,7 +37,11 @@ const AddressForm: React.FC<AddressFormProps> = ({
     },
   });
 
-  const handleBlur = async (field: string) => {
+  // const handleBlur = async (field: string) => {
+  //   await trigger(field);
+  // };
+
+    const handleBlur = async (field: "newAddress" | "landmark" | "town" | "lga" | "country") => {
     await trigger(field);
   };
 

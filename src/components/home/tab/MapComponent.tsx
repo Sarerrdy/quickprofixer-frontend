@@ -4,6 +4,7 @@ interface MapComponentProps {
   currentLocation: { lat: number; lng: number } | null;
   manualLocation: { lat: number; lng: number } | null;
   setManualLocation: (location: { lat: number; lng: number } | null) => void;
+  onError: (error: any) => void;
 }
 
 const MapComponent: React.FC<MapComponentProps> = ({ currentLocation, manualLocation, setManualLocation }) => {

@@ -12,6 +12,15 @@ declare global {
   }
 }
 
+interface RegisteredAddress {
+  addressLine: string;
+  landmark?: string;
+  town: string;
+  lga: string;
+  state: string;
+  country: string;
+}
+
 interface LocationTabProps {
   newAddress: string;
   setNewAddress: (address: string) => void;
@@ -27,6 +36,8 @@ interface LocationTabProps {
   setCurrentLocation: (location: { lat: number; lng: number } | null) => void;
   manualLocation: { lat: number; lng: number } | null;
   setManualLocation: (location: { lat: number; lng: number } | null) => void;
+  addressId: number; // Ensure addressId is of type number
+  setAddressId: (id: number) => void; // Ensure setAddressId accepts only number
 }
 
 const LocationTab: React.FC<LocationTabProps> = ({
@@ -44,13 +55,15 @@ const LocationTab: React.FC<LocationTabProps> = ({
   setCurrentLocation,
   manualLocation,
   setManualLocation,
+  addressId,
+  setAddressId,
 }) => {
   const [locationOption, setLocationOption] = useState('registered');
   const [locationError, setLocationError] = useState<string | null>(null);
   const [mapError, setMapError] = useState<string | null>(null);
 
   // Fetch the registered address when the "registered" option is selected
-  const { data: registeredAddress, error: fetchError } = useFetch(
+  const { data: registeredAddress, error: fetchError } = useFetch<RegisteredAddress>(
     ['address', 1],
     '/address/1',
     {},
@@ -61,7 +74,7 @@ const LocationTab: React.FC<LocationTabProps> = ({
     if (locationOption === 'registered' && registeredAddress) {
       const formattedAddress = `${registeredAddress.addressLine}, ${registeredAddress.landmark ? registeredAddress.landmark + ', ' : ''}${registeredAddress.town}, ${registeredAddress.lga}, ${registeredAddress.state}, ${registeredAddress.country}`;
       setNewAddress(formattedAddress);
-      setLandmark(registeredAddress.landmark);
+      setLandmark(registeredAddress.landmark || '');
       setTown(registeredAddress.town);
       setLga(registeredAddress.lga);
       setCountry(registeredAddress.country);
@@ -167,6 +180,7 @@ const LocationTab: React.FC<LocationTabProps> = ({
 
   return (
     <Box>
+      <>
       <FormControl component="fieldset">
         <RadioGroup value={locationOption} onChange={handleLocationChange}>
           <Box display="flex" flexDirection="row">
@@ -186,29 +200,32 @@ const LocationTab: React.FC<LocationTabProps> = ({
           </IconButton>
         )}
       </Typography>
-      {locationOption === 'new' && (
-        <AddressForm
-          newAddress={newAddress}
-          setNewAddress={setNewAddress}
-          landmark={landmark}
-          setLandmark={setLandmark}
-          town={town}
-          setTown={setTown}
-          lga={lga}
-          setLga={setLga}
-          country={country}
-          setCountry={setCountry}
-        />
-      )}
-      {locationOption === 'current' && currentLocation && (
-        <MapComponent
-          currentLocation={currentLocation}
-          manualLocation={manualLocation}
-          setManualLocation={setManualLocation}
-          onError={(error) => setMapError(error)}
-        />
-      )}
+      <>
+        {locationOption === 'new' && (
+          <AddressForm
+            newAddress={newAddress}
+            setNewAddress={setNewAddress}
+            landmark={landmark}
+            setLandmark={setLandmark}
+            town={town}
+            setTown={setTown}
+            lga={lga}
+            setLga={setLga}
+            country={country}
+            setCountry={setCountry}
+          />
+        )}
+        {locationOption === 'current' && currentLocation && (
+          <MapComponent
+            currentLocation={currentLocation}
+            manualLocation={manualLocation}
+            setManualLocation={setManualLocation}
+            onError={(error: any) => setMapError(error)} // Add type for error
+          />
+        )}
+      </>
       {mapError && <Typography color="error">{mapError}</Typography>}
+      </>
     </Box>
   );
 };

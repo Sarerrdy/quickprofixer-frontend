@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, Tab, Box, Button, useMediaQuery, useTheme, Typography } from '@mui/material';
 import SearchSection from './SearchSection';
 import TabProgressBar from './TabProgressBar';
@@ -8,7 +8,7 @@ import FilesTab from './FilesTab';
 import LocationTab from './LocationTab';
 import PreviewTab from './PreviewTab';
 import FixerList from '../fixers/FixerList';
-import { useFetch } from '../../../api/hooks/useApi'; // Import the useFetch hook
+import { useFetch } from '../../../api/hooks/useApi';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -23,7 +23,7 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index, ...other })
       hidden={value !== index}
       id={`tabpanel-${index}`}
       aria-labelledby={`tab-${index}`}
-      {...other }
+      {...other}
     >
       {value === index && (
         <Box p={3} className="py-20 px-4 mx-auto">
@@ -53,6 +53,7 @@ interface Fixer {
   portfolio: string;
   rateType: string;
   rate: number;
+  imageUrl: string;
 }
 
 const TabsControl: React.FC = () => {
@@ -73,21 +74,21 @@ const TabsControl: React.FC = () => {
   const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [manualLocation, setManualLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [showFixers, setShowFixers] = useState(false);
-  const [serviceType, setServiceType] = useState(''); // Add state for service type
-  const [serviceTypeId, setServiceTypeId] = useState<number | null>(null); // Add state for service type ID
-  const [searchTerm, setSearchTerm] = useState(''); // Add state for search term
-  const [fetchFixers, setFetchFixers] = useState(false); // Add state to control fetch
-  const [addressId, setAddressId] = useState<number | null>(1); // Add state for address ID
+  const [serviceType, setServiceType] = useState('');
+  const [serviceTypeId, setServiceTypeId] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [fetchFixers, setFetchFixers] = useState(false);
+  const [addressId, setAddressId] = useState<number>(1); // Ensure addressId is of type number
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   const minRating = 4;
 
-  const { data: fixers, isLoading, error } = useFetch<Fixer[]>(
+  const { data: fixers = [], isLoading, error } = useFetch<Fixer[]>(
     fetchFixers ? ['fixers', serviceType, town, minRating] : ['fixers'],
     fetchFixers ? '/fixer/search' : '',
     fetchFixers ? { skillCategory: serviceType, location: town, minRating } : {},
-    { enabled: fetchFixers } // Enable fetch only when fetchFixers is true
+    { enabled: fetchFixers }
   );
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -117,7 +118,7 @@ const TabsControl: React.FC = () => {
   };
 
   const handleFindFixers = () => {
-    setFetchFixers(true); // Set fetchFixers to true to trigger the fetch
+    setFetchFixers(true);
     setShowFixers(true);
   };
 
@@ -199,25 +200,27 @@ const TabsControl: React.FC = () => {
         />
       </TabPanel>
       <TabPanel value={value} index={5}>
-        <PreviewTab
-          serviceType={serviceType} // Pass the selected service type
-          selectedDate={selectedDate}
-          title={title}
-          description={description}
-          image={image}
-          document={document}
-          links={links}
-          address={newAddress}
-          landmark={landmark}
-          town={town}
-          lga={lga}
-          country={country}
-        />       
-        {showFixers && !isLoading && !error && (
-          <FixerList fixers={fixers} previewData={previewData} clientId="client-id" /> // Pass previewData and clientId
-        )}
-        {isLoading && <Typography>Loading...</Typography>}
-        {error && <Typography>Error loading fixers</Typography>}
+        <>
+          <PreviewTab
+            serviceType={serviceType}
+            selectedDate={selectedDate}
+            title={title}
+            description={description}
+            image={image}
+            document={document}
+            links={links}
+            address={newAddress}
+            landmark={landmark}
+            town={town}
+            lga={lga}
+            country={country}
+          />
+          {showFixers && !isLoading && !error && (
+            <FixerList fixers={fixers} previewData={previewData} clientId="client-id" />
+          )}
+          {isLoading && <Typography>Loading...</Typography>}
+          {error && <Typography>Error loading fixers</Typography>}
+        </>
       </TabPanel>
       <Box sx={{ display: 'flex', justifyContent: { xs: 'center', sm: 'flex-start' }, mt: 2, gap: 1 }}>
         <Button variant="contained" color="primary" onClick={handlePrevious} disabled={value === 0}>
