@@ -12,14 +12,14 @@ export const dummyFixers = [
     certifications: 'Certified Plumber, Certified Electrician',
     verificationDocument: 'Verified',
     isVerified: true,
-    rating: 4.5,
+    rating: 4.1,
     location: 'Anytown, USA',
     isAvailable: true,
     reviews: 'Great service!',
-    experienceYears: 10,
+    experienceYears: 12,
     portfolio: 'Portfolio link',
     rateType: 'Hourly',
-    rate: 50,
+    rate: 5.0,
     imageUrl: '/sample_img/fixer1.png', // Add image path
   },
   {

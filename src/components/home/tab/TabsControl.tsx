@@ -16,6 +16,7 @@ interface TabPanelProps {
   value: number;
 }
 
+
 const TabPanel: React.FC<TabPanelProps> = ({ children, value, index, ...other }) => {
   return (
     <div
@@ -83,13 +84,14 @@ const TabsControl: React.FC = () => {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   const minRating = 4;
-
+  debugger;
   const { data: fixers = [], isLoading, error } = useFetch<Fixer[]>(
     fetchFixers ? ['fixers', serviceType, town, minRating] : ['fixers'],
     fetchFixers ? '/fixer/search' : '',
     fetchFixers ? { skillCategory: serviceType, location: town, minRating } : {},
     { enabled: fetchFixers }
   );
+  debugger;
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     if (newValue <= value) {
@@ -117,7 +119,7 @@ const TabsControl: React.FC = () => {
     }
   };
 
-  const handleFindFixers = () => {
+  const handleFindFixers = () => {   
     setFetchFixers(true);
     setShowFixers(true);
   };
