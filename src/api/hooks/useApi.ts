@@ -5,6 +5,8 @@ import axiosInstance from '../axios';
 const fetchData = async <T>(url: string, params?: Record<string, any>): Promise<T> => {
   try {
     const { data } = await axiosInstance.get(url, { params });
+    console.log('API response for', url, 'with params', params, ':', data); // <-- Debug log
+    console.log('API RAW TOWN RESPONSE:', data); // <-- Add this
     return data;
   } catch (error) {
     throw error;

@@ -9,6 +9,7 @@ import LocationTab from './LocationTab';
 import PreviewTab from './PreviewTab';
 import FixerList from '../fixers/FixerList';
 import { useFetch } from '../../../api/hooks/useApi';
+import { Fixer } from '../fixers/Fixer'; // Adjust the import path as necessary
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -35,27 +36,27 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index, ...other })
   );
 };
 
-interface Fixer {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phoneNumber: string;
-  address: string;
-  specializations: string;
-  certifications?: string;
-  verificationDocument: string;
-  isVerified: boolean;
-  rating: number;
-  location: string;
-  isAvailable: boolean;
-  reviews: string;
-  experienceYears: number;
-  portfolio: string;
-  rateType: string;
-  rate: number;
-  imageUrl: string;
-}
+// interface Fixer {
+//   id: number;
+//   firstName: string;
+//   lastName: string;
+//   email: string;
+//   phoneNumber: string;
+//   address: string;
+//   specializations: string;
+//   certifications?: string;
+//   verificationDocument: string;
+//   isVerified: boolean;
+//   rating: number;
+//   location: string;
+//   isAvailable: boolean;
+//   reviews: string;
+//   experienceYears: number;
+//   portfolio: string;
+//   rateType: string;
+//   rate: number;
+//   imageUrl: string;
+// }
 
 const TabsControl: React.FC = () => {
   const [value, setValue] = useState(0);
@@ -84,14 +85,16 @@ const TabsControl: React.FC = () => {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   const minRating = 4;
-  debugger;
+
+  console.log('Querying fixers with:', { serviceType, town, minRating });
+
   const { data: fixers = [], isLoading, error } = useFetch<Fixer[]>(
-    fetchFixers ? ['fixers', serviceType, town, minRating] : ['fixers'],
+    fetchFixers ? ['fixers', serviceType, location, minRating] : ['fixers'],
     fetchFixers ? '/fixer/search' : '',
     fetchFixers ? { skillCategory: serviceType, location: town, minRating } : {},
     { enabled: fetchFixers }
   );
-  debugger;
+
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     if (newValue <= value) {
