@@ -1,5 +1,11 @@
 import React, { useEffect } from 'react';
 
+declare global {
+  interface Window {
+    initMap: any;
+  }
+}
+
 interface MapComponentProps {
   currentLocation: { lat: number; lng: number } | null;
   manualLocation: { lat: number; lng: number } | null;
