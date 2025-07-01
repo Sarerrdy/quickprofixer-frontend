@@ -13,7 +13,7 @@ const HomePage: React.FC = () => {
       <HeroSection />
 	    <TabsControl />
       <ServicesSection />
-      <TestimonialsSection />
+      {/* <TestimonialsSection /> */}
       <Footer />
     </div>
   );
