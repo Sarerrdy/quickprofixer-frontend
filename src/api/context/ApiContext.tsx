@@ -16,4 +16,4 @@ export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
       {children}
     </QueryClientProvider>
   );
-};
+}; 

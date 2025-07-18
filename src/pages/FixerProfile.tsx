@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import Header from '../../components/layout/Header';
-import Footer from '../../components/layout/Footer';
-import { useFetch, useUpdate } from '../../api/hooks/useApi';
+import Header from '../components/layout/Header';
+import Footer from '../components/layout/Footer';
+import { useFetch, useUpdate } from '../api/hooks/useApi';
 
 interface FixerProfileInputs {
   firstName: string;

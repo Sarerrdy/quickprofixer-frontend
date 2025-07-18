@@ -1,7 +1,9 @@
 import React from 'react';
 import { Card, CardContent, Typography, Box, CardMedia, Button } from '@mui/material';
-import { usePost } from '../../../api/hooks/useApi';
-import { Fixer } from '../fixers/Fixer'; 
+import { usePost } from '../../api/hooks/useApi';
+import { Fixer } from './Fixer';
+import { useNavigate } from 'react-router-dom'; // <-- Add this import
+
 
 interface SupportingFileDto {
   FileName: string;
@@ -46,6 +48,19 @@ interface FixerCardProps {
 
 const FixerCard: React.FC<FixerCardProps> = ({ fixer, clientId, previewData }) => {
   const { mutate: createFixRequest, isLoading, isError, isSuccess } = usePost<FixRequestDto>('fixrequest/fix-request');
+
+    const navigate = useNavigate(); // <-- Add this line
+
+  React.useEffect(() => {
+    if (isSuccess) {
+      // Wait a short moment to show the success message, then navigate
+      const timeout = setTimeout(() => {
+        navigate('./dashboardPage');
+      }, 1200); // 1.2 seconds
+      return () => clearTimeout(timeout);
+    }
+  }, [isSuccess, navigate]);
+
 
   const handleSendFixRequest = async () => {
     const fixRequestDto: FixRequestDto = {

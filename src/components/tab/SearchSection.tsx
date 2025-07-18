@@ -1,6 +1,6 @@
 // src/components/home/SearchSection.tsx
 import React, { useState, useEffect, useRef } from 'react';
-import { useFetch } from '../../../api/hooks/useApi';
+import { useFetch } from '../../api/hooks/useApi';
 
 interface Service {
   id: number;
