@@ -229,7 +229,7 @@ const LocationTab: React.FC<LocationTabProps> = ({
     });
   };
 
-  useEffect(() => {
+    useEffect(() => {
     if (locationOption === 'current') {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -241,15 +241,42 @@ const LocationTab: React.FC<LocationTabProps> = ({
             setLocationError(null);
           },
           (error) => {
-            setLocationError('Error getting current location. Please use the manual location option.');
+            // Log the actual error object to the browser console for review
+            console.error('Geolocation error:', error);
+            setLocationError(
+              `Error getting current location (${error.code}: ${error.message}). Please use the manual location option.`
+            );
           },
           { enableHighAccuracy: true }
         );
       } else {
+        console.error('Geolocation is not supported by this browser.');
         setLocationError('Geolocation is not supported by this browser. Please use the manual location option.');
       }
     }
   }, [locationOption]);
+
+  // useEffect(() => {
+  //   if (locationOption === 'current') {
+  //     if (navigator.geolocation) {
+  //       navigator.geolocation.getCurrentPosition(
+  //         (position) => {
+  //           setCurrentLocation({
+  //             lat: position.coords.latitude,
+  //             lng: position.coords.longitude,
+  //           });
+  //           setLocationError(null);
+  //         },
+  //         (error) => {
+  //           setLocationError('Error getting current location. Please use the manual location option.');
+  //         },
+  //         { enableHighAccuracy: true }
+  //       );
+  //     } else {
+  //       setLocationError('Geolocation is not supported by this browser. Please use the manual location option.');
+  //     }
+  //   }
+  // }, [locationOption]);
 
   useEffect(() => {
     if (locationOption === 'current') {
