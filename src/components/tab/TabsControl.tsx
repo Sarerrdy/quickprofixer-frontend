@@ -75,6 +75,10 @@ const TabsControl: React.FC = () => {
   const [addressId, setAddressId] = useState<number>(1);
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const [dateError, setDateError] = useState<string>('');
+  const [descError, setDescError] = useState<string>('');
+  const [descTouched, setDescTouched] = useState(false);
+
 
   const minRating = 4;
 
@@ -92,6 +96,34 @@ const TabsControl: React.FC = () => {
   };
 
   const handleNext = () => {
+    // Check for service selection on first tab
+    if (value === 0 && !serviceType) return;
+
+    // Check for valid date on DateTab
+    if (value === 1) {
+      const now = new Date();
+      const minDate = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour ahead
+      if (!selectedDate || selectedDate < minDate) {
+        setDateError('Please select a date at least one hour from now.');
+        return;
+      } else {
+        setDateError('');
+      }
+    }
+
+      // Check for valid title/description on DescriptionTab
+    if (value === 2) {
+      if (!isValidText(title, 5)) {
+        setDescError('Title must be at least 5 letters and not only numbers or special characters.');
+        return;
+      }
+      if (!isValidText(description, 20)) {
+        setDescError('Description must be at least 20 letters and not only numbers or special characters.');
+        return;
+      }
+      setDescError('');
+    }
+
     if (value < labels.length - 1) {
       setValue(value + 1);
     }
@@ -135,6 +167,17 @@ const TabsControl: React.FC = () => {
     addressId,
   };
 
+   // ---- Validation utility
+  function isValidText(str: string, minLen: number) {
+  const trimmed = str.trim();
+  // At least minLen letters, not only numbers or special chars
+  return (
+    trimmed.length >= minLen &&
+    /[a-zA-Z]/.test(trimmed) && // must contain at least one letter
+    !/^[\d\W]+$/.test(trimmed) // not only numbers or special chars
+  );
+ }
+
   // Responsive container widths
   const TAB_CONTAINER_WIDTH = { xs: '100%', md: '65%' };
 
@@ -149,6 +192,38 @@ const TabsControl: React.FC = () => {
       });
     }
   }, [value, isSmallScreen]);
+
+  // --- Date validation ---
+    useEffect(() => {
+    if (value === 1) {
+      const now = new Date();
+      const minDate = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour ahead
+      if (!selectedDate || selectedDate < minDate) {
+        setDateError('Please select a date at least one hour from now.');
+      } else {
+        setDateError('');
+      }
+    }
+  }, [selectedDate, value]);
+
+  // ----description validation
+   useEffect(() => {
+  if (value === 2 && descTouched) {
+    if (!isValidText(title, 5)) {
+      setDescError('Title must be at least 5 letters and not only numbers or special characters.');
+      return;
+    }
+    if (!isValidText(description, 20)) {
+      setDescError('Description must be at least 20 letters and not only numbers or special characters.');
+      return;
+    }
+    setDescError('');
+  } else {
+    setDescError('');
+  }
+}, [title, description, value, descTouched]);
+
+ 
   // -----------------------------------
 
   return (
@@ -228,9 +303,27 @@ const TabsControl: React.FC = () => {
         </TabPanel>
         <TabPanel value={value} index={1}>
           <DateTab selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
+          {dateError && (
+          <Typography color="error" sx={{ mt: 2, textAlign: 'center' }}>
+            {dateError}
+          </Typography>
+        )}
         </TabPanel>
         <TabPanel value={value} index={2}>
-          <DescriptionTab title={title} setTitle={setTitle} description={description} setDescription={setDescription} />
+          {/* Validation message above title */}
+          {descError && (
+            <Typography color="error" sx={{ mb: 2, textAlign: 'center' }}>
+              {descError}
+            </Typography>
+          )}
+          <DescriptionTab
+            title={title}
+            setTitle={val => { setTitle(val); setDescTouched(true); }}
+            description={description}
+            setDescription={val => { setDescription(val); setDescTouched(true); }}
+            titlePlaceholder="Enter a brief summary (at least 5 letters, not only numbers or symbols)"
+            descriptionPlaceholder="Describe your request in detail (at least 20 letters, not only numbers or symbols)"
+          />
         </TabPanel>
         <TabPanel value={value} index={3}>
           <FilesTab
@@ -294,7 +387,15 @@ const TabsControl: React.FC = () => {
             Previous
           </Button>
           {value < labels.length - 1 ? (
-            <Button variant="contained" color="primary" onClick={handleNext}>
+            <Button
+            variant="contained"
+            color="primary"
+            onClick={handleNext}
+            disabled={(value === 0 && !serviceType) ||
+            (value === 1 && (!!dateError || !selectedDate)) ||
+            (value === 2 && (!isValidText(title, 5) || !isValidText(description, 20)))
+            }
+            >
               Next
             </Button>
           ) : (
