@@ -270,6 +270,36 @@ const TabsControl: React.FC = () => {
             </div>
           ))}
         </Tabs>
+
+        {/* <Tabs
+          value={value}
+          onChange={handleChange}
+          aria-label="tabs example"
+          centered={!isSmallScreen}
+          variant={isSmallScreen ? 'scrollable' : 'standard'}
+          scrollButtons={isSmallScreen ? 'auto' : undefined}
+          sx={{
+            minWidth: isSmallScreen ? 'max-content' : undefined,
+          }}
+        >
+          {labels.map((label, index) => (
+            <div
+              key={index}
+              ref={el => (tabRefs.current[index] = el)}
+              style={{ display: 'inline-block' }}
+            >
+              <Tab
+                label={label}
+                disabled={index > value}
+                sx={
+                  isSmallScreen
+                    ? { minWidth: 120 }
+                    : { minWidth: 0, flex: 1 }
+                }
+              />
+            </div>
+          ))}
+        </Tabs> */}
       </Box>
 
       {/* Progress Bar */}
@@ -391,7 +421,7 @@ const TabsControl: React.FC = () => {
             variant="contained"
             color="primary"
             onClick={handleNext}
-            disabled={(value === 0 && !serviceType) ||
+            disabled={value === 0 && (!serviceType || serviceType.trim() === '') ||
             (value === 1 && (!!dateError || !selectedDate)) ||
             (value === 2 && (!isValidText(title, 5) || !isValidText(description, 20)))
             }
