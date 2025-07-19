@@ -1,6 +1,10 @@
 import React from 'react';
 import { Box, Typography, Table, TableBody, TableCell, TableRow, Divider } from '@mui/material';
 
+/**
+ * Props for the PreviewTab component.
+ * Displays a summary of the user's request before submission.
+ */
 interface PreviewTabProps {
   serviceType: string;
   selectedDate: Date | null;
@@ -16,6 +20,12 @@ interface PreviewTabProps {
   country: string;
 }
 
+/**
+ * PreviewTab component renders a summary table of all request details,
+ * including service, date, description, address, and supporting files/links.
+ * - Uses Material UI Table and Typography for layout.
+ * - No inline styles; all layout via MUI sx prop.
+ */
 const PreviewTab: React.FC<PreviewTabProps> = ({
   serviceType,
   selectedDate,
@@ -30,40 +40,80 @@ const PreviewTab: React.FC<PreviewTabProps> = ({
   lga,
   country,
 }) => {
-  // Helper to render file/link rows
+  /**
+   * Helper to render file and link rows for the supporting files section.
+   * Uploaded image/document are previewed as "Supporting Image" or "Supporting Document".
+   */
   const renderFileRows = () => {
-    const rows: { title: string; url: string }[] = [];
+    const rows: React.ReactNode[] = [];
 
     if (image) {
-      rows.push({ title: 'Image', url: image.name });
+      rows.push(
+        <TableRow key="supporting-image">
+          <TableCell sx={{ fontWeight: 600, width: 160, textAlign: 'right', pr: 2 }}>
+            Supporting Image
+          </TableCell>
+          <TableCell sx={{ textAlign: 'left' }}>
+            {image.name}
+            {/* Optionally, show a thumbnail preview if image is available */}
+            {image.type.startsWith('image/') && (
+              <img
+                src={URL.createObjectURL(image)}
+                alt={image.name}
+                className="mt-2 rounded shadow"
+                style={{ maxWidth: '120px', maxHeight: '80px', display: 'block' }}
+              />
+            )}
+          </TableCell>
+        </TableRow>
+      );
     }
     if (document) {
-      rows.push({ title: 'Document', url: document.name });
+      rows.push(
+        <TableRow key="supporting-document">
+          <TableCell sx={{ fontWeight: 600, width: 160, textAlign: 'right', pr: 2 }}>
+            Supporting Document
+          </TableCell>
+          <TableCell sx={{ textAlign: 'left' }}>
+            {document.name}
+          </TableCell>
+        </TableRow>
+      );
     }
-    links.forEach(link => {
-      rows.push({ title: link.title, url: link.url });
+    links.forEach((link, idx) => {
+      rows.push(
+        <React.Fragment key={`link-${idx}`}>
+          <TableRow>
+            <TableCell sx={{ fontWeight: 600, width: 160, textAlign: 'right', pr: 2 }}>
+              Link Title
+            </TableCell>
+            <TableCell sx={{ textAlign: 'left' }}>{link.title}</TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell sx={{ fontWeight: 600, width: 160, textAlign: 'right', pr: 2 }}>
+              Link Address
+            </TableCell>
+            <TableCell sx={{ textAlign: 'left' }}>{link.url}</TableCell>
+          </TableRow>
+        </React.Fragment>
+      );
     });
 
-    return rows.map((item, idx) => (
-      <React.Fragment key={idx}>
-        <TableRow>
-          <TableCell sx={{ fontWeight: 600, width: 160, textAlign: 'right', pr: 2 }}>
-            link title
-          </TableCell>
-          <TableCell sx={{ textAlign: 'left' }}>{item.title}</TableCell>
-        </TableRow>
-        <TableRow>
-          <TableCell sx={{ fontWeight: 600, width: 160, textAlign: 'right', pr: 2 }}>
-            link address
-          </TableCell>
-          <TableCell sx={{ textAlign: 'left' }}>{item.url}</TableCell>
-        </TableRow>
-      </React.Fragment>
-    ));
+    return rows;
   };
 
   return (
-    <Box sx={{ p: 3 }}>
+     <Box
+    sx={{
+      p: 3,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      maxWidth: { xs: '100%', sm: 700, md: '70vw', lg: '60vw' },
+      mx: 'auto',
+    }}
+  >
+      {/* Main heading */}
       <Typography variant="h5" gutterBottom>
         Preview of Your Request
       </Typography>
@@ -160,95 +210,3 @@ const PreviewTab: React.FC<PreviewTabProps> = ({
 };
 
 export default PreviewTab;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import React from 'react';
-// import { Box, Typography, List, ListItem, ListItemText } from '@mui/material';
-
-// interface PreviewTabProps {
-//   serviceType: string;
-//   selectedDate: Date | null;
-//   title: string;
-//   description: string;
-//   image: File | null;
-//   document: File | null;
-//   links: { title: string; url: string }[];
-//   address: string;
-//   landmark: string;
-//   town: string;
-//   lga: string;
-//   country: string;
-// }
-
-// const PreviewTab: React.FC<PreviewTabProps> = ({
-//   serviceType,
-//   selectedDate,
-//   title,
-//   description,
-//   image,
-//   document,
-//   links,
-//   address,
-//   landmark,
-//   town,
-//   lga,
-//   country,
-// }) => {
-//   return (
-//     <Box sx={{ p: 3 }}>
-//       <Typography variant="h5" gutterBottom>
-//         Preview of Your Request
-//       </Typography>
-//       <Typography variant="h6">Service Type</Typography>
-//       <Typography variant="body1">{serviceType}</Typography>
-//       <Typography variant="h6" sx={{ mt: 2 }}>Date</Typography>
-//       <Typography variant="body1">{selectedDate ? selectedDate.toLocaleString() : 'N/A'}</Typography>
-//       <Typography variant="h6" sx={{ mt: 2 }}>Request Title</Typography>
-//       <Typography variant="body1">{title}</Typography>
-//       <Typography variant="h6" sx={{ mt: 2 }}>Description</Typography>
-//       <Typography variant="body1">{description}</Typography>
-//       <Typography variant="h6" sx={{ mt: 2 }}>Supporting Files</Typography>
-//       <List>
-//         {image && (
-//           <ListItem>
-//             <ListItemText primary="Image" secondary={image.name} />
-//           </ListItem>
-//         )}
-//         {document && (
-//           <ListItem>
-//             <ListItemText primary="Document" secondary={document.name} />
-//           </ListItem>
-//         )}
-//         {links.map((link, index) => (
-//           <ListItem key={index}>
-//             <ListItemText primary={link.title} secondary={link.url} />
-//           </ListItem>
-//         ))}
-//       </List>
-//       <Typography variant="h6" sx={{ mt: 2 }}>Address</Typography>
-//       <Typography variant="body1">{address}</Typography>
-//       <Typography variant="body1">{landmark}</Typography>
-//       <Typography variant="body1">{town}</Typography>
-//       <Typography variant="body1">{lga}</Typography>
-//       <Typography variant="body1">{country}</Typography>
-//     </Box>
-//   );
-// };
-
-// export default PreviewTab;

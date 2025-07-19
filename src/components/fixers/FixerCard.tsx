@@ -1,16 +1,21 @@
 import React from 'react';
-import { Card, CardContent, Typography, Box, CardMedia, Button } from '@mui/material';
+import { Card, CardContent, Typography, CardMedia, Button, Snackbar, Alert } from '@mui/material';
 import { usePost } from '../../api/hooks/useApi';
 import { Fixer } from './Fixer';
-import { useNavigate } from 'react-router-dom'; // <-- Add this import
+import { useNavigate } from 'react-router-dom';
 
-
+/**
+ * DTO for supporting files (image/document).
+ */
 interface SupportingFileDto {
   FileName: string;
   FileType: string;
   FileContent: string;
 }
 
+/**
+ * DTO for fix request payload.
+ */
 interface FixRequestDto {
   JobDescription: string;
   SpecializationId: number | null;
@@ -25,6 +30,9 @@ interface FixRequestDto {
   SupportingFiles: string[];
 }
 
+/**
+ * Props for FixerCard component.
+ */
 interface FixerCardProps {
   fixer: Fixer;
   clientId: string;
@@ -46,22 +54,43 @@ interface FixerCardProps {
   };
 }
 
+/**
+ * FixerCard displays a single fixer's details and allows sending a fix request.
+ * - Uses Material UI for layout and styling.
+ * - Shows loading, error, and success states.
+ * - Navigates to dashboard on successful request.
+ * - Uses Snackbar/Alert for toast notifications.
+ */
 const FixerCard: React.FC<FixerCardProps> = ({ fixer, clientId, previewData }) => {
   const { mutate: createFixRequest, isLoading, isError, isSuccess } = usePost<FixRequestDto>('fixrequest/fix-request');
+  const navigate = useNavigate();
 
-    const navigate = useNavigate(); // <-- Add this line
+  // Snackbar state for toast notifications
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+  const [snackbarMsg, setSnackbarMsg] = React.useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = React.useState<'success' | 'error'>('success');
 
+  // Show toast on error or success
   React.useEffect(() => {
+    if (isError) {
+      setSnackbarMsg('Error creating fix request.');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    }
     if (isSuccess) {
-      // Wait a short moment to show the success message, then navigate
+      setSnackbarMsg('Fix request created successfully!');
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
       const timeout = setTimeout(() => {
         navigate('./dashboardPage');
-      }, 1200); // 1.2 seconds
+      }, 4000);
       return () => clearTimeout(timeout);
     }
-  }, [isSuccess, navigate]);
+  }, [isError, isSuccess, navigate]);
 
-
+  /**
+   * Handles sending a fix request to the selected fixer.
+   */
   const handleSendFixRequest = async () => {
     const fixRequestDto: FixRequestDto = {
       JobDescription: previewData.description,
@@ -93,12 +122,26 @@ const FixerCard: React.FC<FixerCardProps> = ({ fixer, clientId, previewData }) =
   };
 
   return (
-    <Card sx={{ mb: 2, display: 'flex', alignItems: 'flex-start' }}>
+    <Card
+      sx={{
+        mb: 2,
+        display: 'flex',
+        alignItems: 'flex-start',
+      }}
+    >
+      {/* Fixer profile image */}
       <CardMedia
         component="img"
-        sx={{ width: 100, height: 100, objectFit: 'cover', borderRadius: '50%', margin: 2,  backgroundColor: '#c9ced7' }}
+        sx={{
+          width: 100,
+          height: 100,
+          objectFit: 'cover',
+          borderRadius: '50%',
+          m: 2,
+          bgcolor: '#c9ced7',
+        }}
         image={fixer.imgUrl}
-        alt={`${fixer.firstName}\n${fixer.lastName}`}
+        alt={`${fixer.firstName} ${fixer.lastName}`}
         loading="lazy"
       />
       <CardContent sx={{ flex: 1 }}>
@@ -118,8 +161,17 @@ const FixerCard: React.FC<FixerCardProps> = ({ fixer, clientId, previewData }) =
         >
           {isLoading ? 'Sending...' : 'Send Fix Request'}
         </Button>
-        {isError && <Typography color="error">Error creating fix request.</Typography>}
-        {isSuccess && <Typography color="success">Fix request created successfully!</Typography>}
+        {/* Toast notification for error and success */}
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={4000}
+          onClose={() => setSnackbarOpen(false)}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        >
+          <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarSeverity} sx={{ width: '100%' }}>
+            {snackbarMsg}
+          </Alert>
+        </Snackbar>
       </CardContent>
     </Card>
   );

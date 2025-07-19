@@ -1,30 +1,14 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import FixerCard from './FixerCard';
-import { Fixer } from './Fixer'; // Adjust the import path as necessary
+import { Fixer } from './Fixer';
 
-// interface Fixer {
-//   id: number;
-//   firstName: string;
-//   lastName: string;
-//   email: string;
-//   phoneNumber: string;
-//   address: string;
-//   specializations: string;
-//   certifications?: string;
-//   verificationDocument: string;
-//   isVerified: boolean;
-//   rating: number;
-//   location: string;
-//   isAvailable: boolean;
-//   reviews: string;
-//   experienceYears: number;
-//   portfolio: string;
-//   rateType: string;
-//   rate: number;
-//   imageUrl: string;
-// }
-
+/**
+ * Props for FixerList component.
+ * - fixers: array of available fixers to display
+ * - clientId: ID of the client making the request
+ * - previewData: request details to send to FixerCard
+ */
 interface FixerListProps {
   fixers: Fixer[];
   clientId: string;
@@ -44,21 +28,28 @@ interface FixerListProps {
     serviceTypeId: number | null;
     addressId: number | 0;
   };
-
 }
 
+/**
+ * FixerList displays a list of available fixers matching the search criteria.
+ * - Uses Material UI Box for layout and spacing.
+ * - Uses FixerCard for each fixer.
+ * - No inline styles; layout via MUI sx prop.
+ */
 const FixerList: React.FC<FixerListProps> = ({ fixers, previewData, clientId }) => {
   return (
-    <Box sx={{ p: 3 }}>
+    <Box className="w-full max-w-3xl mx-auto py-4 px-2">
       <Typography variant="h5" gutterBottom>
         Available Fixers
       </Typography>
       {fixers.length === 0 ? (
         <Typography>No fixers found.</Typography>
       ) : (
-        fixers.map((fixer) => (
-          <FixerCard key={fixer.id} fixer={fixer} previewData={previewData} clientId={clientId} />
-        ))
+        <div className="flex flex-col gap-4">
+          {fixers.map((fixer) => (
+            <FixerCard key={fixer.id} fixer={fixer} previewData={previewData} clientId={clientId} />
+          ))}
+        </div>
       )}
     </Box>
   );

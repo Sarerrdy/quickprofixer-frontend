@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Tabs, Tab, Box, Button, useMediaQuery, useTheme, Typography, Divider } from '@mui/material';
+import { Tabs, Tab, Box, Button, useMediaQuery, useTheme, Typography, Divider, Snackbar, Alert } from '@mui/material';
 import SearchSection from './SearchSection';
 import TabProgressBar from './TabProgressBar';
 import DateTab from './DateTab';
@@ -8,15 +8,24 @@ import FilesTab from './FilesTab';
 import LocationTab from './LocationTab';
 import PreviewTab from './PreviewTab';
 import FixerList from '../fixers/FixerList';
+import AvailableFixersTab from './AvailableFixersTab';
 import { useFetch } from '../../api/hooks/useApi';
 import { Fixer } from '../fixers/Fixer';
 
+/**
+ * Props for TabPanel component.
+ */
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
   value: number;
 }
 
+/**
+ * TabPanel component renders the content of each tab.
+ * Uses Tailwind CSS for layout and Material UI Box for padding and sizing.
+ * Uses a light gray background to visually separate from layout background.
+ */
 const TabPanel: React.FC<TabPanelProps> = ({ children, value, index, ...other }) => {
   return (
     <div
@@ -25,22 +34,18 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index, ...other })
       id={`tabpanel-${index}`}
       aria-labelledby={`tab-${index}`}
       {...other}
-      style={{
-        width: '100%',
-        height: '420px',
-        overflow: 'auto',
-        boxSizing: 'border-box',
-      }}
-      className="tab-panel-scroll"
+      className="tab-panel-scroll w-full h-full overflow-y-auto box-border"
     >
       {value === index && (
         <Box
           p={3}
-          className="py-20 px-4 mx-auto"
+          className="py-10 px-4 mx-auto rounded-lg shadow-sm"
           sx={{
             width: '100%',
             minWidth: 0,
             boxSizing: 'border-box',
+            borderRadius: 2,
+            boxShadow: '0 1px 4px 0 rgba(0,0,0,0.03)',
           }}
         >
           {children}
@@ -50,8 +55,17 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index, ...other })
   );
 };
 
+/**
+ * Main TabsControl component for the multi-step service request flow.
+ * - Handles tab navigation, validation, and state for each step.
+ * - Uses Material UI Tabs and Tab components for navigation.
+ * - Uses Tailwind CSS for layout and scroll styling.
+ */
 const TabsControl: React.FC = () => {
+  // Tab navigation state
   const [value, setValue] = useState(0);
+
+  // Form states for each tab
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -73,15 +87,31 @@ const TabsControl: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [fetchFixers, setFetchFixers] = useState(false);
   const [addressId, setAddressId] = useState<number>(1);
+
+  // Responsive design hooks
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
+  // Validation states
   const [dateError, setDateError] = useState<string>('');
   const [descError, setDescError] = useState<string>('');
   const [descTouched, setDescTouched] = useState(false);
 
+  // Snackbar state for toast notifications
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMsg, setSnackbarMsg] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error' | 'info' | 'warning'>('info');
 
+  // Heading for Available Fixers tab
+  const [fixersTabHeading, setFixersTabHeading] = useState('Available Fixers');
+
+  // Minimum rating for fixer search
   const minRating = 4;
 
+  /**
+   * Fetch fixers based on selected service and location.
+   * Only enabled when user clicks "Find Fixers Now".
+   */
   const { data: fixers = [], isLoading, error } = useFetch<Fixer[]>(
     fetchFixers ? ['fixers', serviceType, town, minRating] : ['fixers'],
     fetchFixers ? '/fixer/search' : '',
@@ -89,17 +119,25 @@ const TabsControl: React.FC = () => {
     { enabled: fetchFixers }
   );
 
+  /**
+   * Handles tab change event.
+   * Only allows navigation to previous or current tabs.
+   */
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     if (newValue <= value) {
       setValue(newValue);
     }
   };
 
+  /**
+   * Handles "Next" button click.
+   * Validates current tab before moving to the next.
+   */
   const handleNext = () => {
-    // Check for service selection on first tab
+    // Tab 0: Service selection required
     if (value === 0 && !serviceType) return;
 
-    // Check for valid date on DateTab
+    // Tab 1: Date validation
     if (value === 1) {
       const now = new Date();
       const minDate = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour ahead
@@ -111,7 +149,7 @@ const TabsControl: React.FC = () => {
       }
     }
 
-      // Check for valid title/description on DescriptionTab
+    // Tab 2: Title and description validation
     if (value === 2) {
       if (!isValidText(title, 5)) {
         setDescError('Title must be at least 5 letters and not only numbers or special characters.');
@@ -129,12 +167,19 @@ const TabsControl: React.FC = () => {
     }
   };
 
+  /**
+   * Handles "Previous" button click.
+   * Moves to the previous tab.
+   */
   const handlePrevious = () => {
     if (value > 0) {
       setValue(value - 1);
     }
   };
 
+  /**
+   * Handles adding a new supporting link.
+   */
   const handleAddLink = () => {
     if (newLinkTitle && newLinkUrl) {
       setLinks([...links, { title: newLinkTitle, url: newLinkUrl }]);
@@ -143,13 +188,28 @@ const TabsControl: React.FC = () => {
     }
   };
 
+  /**
+   * Handles "Find Fixers Now" button click.
+   * Triggers fixer search and moves to the "Available Fixers" tab.
+   */
   const handleFindFixers = () => {
     setFetchFixers(true);
     setShowFixers(true);
+    setValue(6); // Move to the new tab after clicking
   };
 
-  const labels = ["Search services", "Date", "Description", "Supporting files", "Location", "Preview"];
+  // Tab labels for navigation, including new "Available Fixers" tab
+  const labels = [
+    "Search services",
+    "Date",
+    "Description",
+    "Supporting files",
+    "Location",
+    "Preview",
+    "Available Fixers"
+  ];
 
+  // Preview data for the final tab
   const previewData = {
     serviceType,
     selectedDate,
@@ -167,21 +227,23 @@ const TabsControl: React.FC = () => {
     addressId,
   };
 
-   // ---- Validation utility
+  /**
+   * Utility function to validate text input.
+   * Ensures minimum length and at least one letter.
+   */
   function isValidText(str: string, minLen: number) {
-  const trimmed = str.trim();
-  // At least minLen letters, not only numbers or special chars
-  return (
-    trimmed.length >= minLen &&
-    /[a-zA-Z]/.test(trimmed) && // must contain at least one letter
-    !/^[\d\W]+$/.test(trimmed) // not only numbers or special chars
-  );
- }
+    const trimmed = str.trim();
+    return (
+      trimmed.length >= minLen &&
+      /[a-zA-Z]/.test(trimmed) && // must contain at least one letter
+      !/^[\d\W]+$/.test(trimmed) // not only numbers or special chars
+    );
+  }
 
-  // Responsive container widths
-  const TAB_CONTAINER_WIDTH = { xs: '100%', md: '65%' };
+  // Responsive container width for tab content
+  const TAB_CONTAINER_WIDTH = { xs: '100%' };
 
-  // --- Tab label scroll into view ---
+  // Refs for tab labels to enable scroll-into-view on small screens
   const tabRefs = useRef<(HTMLDivElement | null)[]>([]);
   useEffect(() => {
     if (isSmallScreen && tabRefs.current[value]) {
@@ -193,8 +255,11 @@ const TabsControl: React.FC = () => {
     }
   }, [value, isSmallScreen]);
 
-  // --- Date validation ---
-    useEffect(() => {
+  /**
+   * Validates selected date on Date tab.
+   * Shows error if date is less than one hour from now.
+   */
+  useEffect(() => {
     if (value === 1) {
       const now = new Date();
       const minDate = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour ahead
@@ -206,41 +271,47 @@ const TabsControl: React.FC = () => {
     }
   }, [selectedDate, value]);
 
-  // ----description validation
-   useEffect(() => {
-  if (value === 2 && descTouched) {
-    if (!isValidText(title, 5)) {
-      setDescError('Title must be at least 5 letters and not only numbers or special characters.');
-      return;
+  /**
+   * Validates title and description on Description tab.
+   * Shows error if requirements are not met.
+   */
+  useEffect(() => {
+    if (value === 2 && descTouched) {
+      if (!isValidText(title, 5)) {
+        setDescError('Title must be at least 5 letters and not only numbers or special characters.');
+        return;
+      }
+      if (!isValidText(description, 20)) {
+        setDescError('Description must be at least 20 letters and not only numbers or special characters.');
+        return;
+      }
+      setDescError('');
+    } else {
+      setDescError('');
     }
-    if (!isValidText(description, 20)) {
-      setDescError('Description must be at least 20 letters and not only numbers or special characters.');
-      return;
-    }
-    setDescError('');
-  } else {
-    setDescError('');
-  }
-}, [title, description, value, descTouched]);
+  }, [title, description, value, descTouched]);
 
- 
-  // -----------------------------------
+  // Show snackbar and update tab heading on error or no fixers found
+  useEffect(() => {
+    if (error) {
+      setSnackbarMsg('Error loading fixers');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+      setFixersTabHeading('Error loading fixers');
+    } else if (!isLoading && !error && fixers.length === 0 && fetchFixers) {
+      setSnackbarMsg('No fixers found matching your criteria. Try again with different filters.');
+      setSnackbarSeverity('warning');
+      setSnackbarOpen(true);
+      setFixersTabHeading('No fixers found matching your criteria. Try again with different filters.');
+    } else if (!isLoading && !error && fixers.length > 0) {
+      setFixersTabHeading('Available Fixers');
+    }
+  }, [error, isLoading, fixers, fetchFixers]);
 
   return (
-    <Box sx={{ width: '100%', maxWidth: '95%', mx: 'auto' }}>
-      {/* Tab Labels */}
-      <Box
-        sx={{
-          width: '100%',
-          maxWidth: '95%',
-          mx: 'auto',
-          px: { xs: 0, sm: 2 },
-          overflowX: 'auto',
-          WebkitOverflowScrolling: 'touch',
-          mb: 0.5,
-        }}
-        className="hide-scrollbar"
-      >
+    <Box className="flex flex-col min-h-screen max-w-full bg-white">
+      {/* Tab Labels Navigation */}
+      <Box className="sticky top-0 z-10 bg-white w-full overflow-x-auto hide-scrollbar">
         <Tabs
           value={value}
           onChange={handleChange}
@@ -256,7 +327,7 @@ const TabsControl: React.FC = () => {
             <div
               key={index}
               ref={el => (tabRefs.current[index] = el)}
-              style={{ display: 'inline-block' }}
+              className="inline-block"
             >
               <Tab
                 label={label}
@@ -270,77 +341,35 @@ const TabsControl: React.FC = () => {
             </div>
           ))}
         </Tabs>
-
-        {/* <Tabs
-          value={value}
-          onChange={handleChange}
-          aria-label="tabs example"
-          centered={!isSmallScreen}
-          variant={isSmallScreen ? 'scrollable' : 'standard'}
-          scrollButtons={isSmallScreen ? 'auto' : undefined}
-          sx={{
-            minWidth: isSmallScreen ? 'max-content' : undefined,
-          }}
-        >
-          {labels.map((label, index) => (
-            <div
-              key={index}
-              ref={el => (tabRefs.current[index] = el)}
-              style={{ display: 'inline-block' }}
-            >
-              <Tab
-                label={label}
-                disabled={index > value}
-                sx={
-                  isSmallScreen
-                    ? { minWidth: 120 }
-                    : { minWidth: 0, flex: 1 }
-                }
-              />
-            </div>
-          ))}
-        </Tabs> */}
       </Box>
 
       {/* Progress Bar */}
-      <Box
-        sx={{
-          width: '100%',
-          maxWidth: '90%',
-          mx: 'auto',
-          px: { xs: 0, sm: 2 },
-          overflowX: 'auto',
-          WebkitOverflowScrolling: 'touch',
-          mb: 2,
-        }}
-        className="hide-scrollbar"
-      >
+      <Box className="sticky z-10 bg-white w-full overflow-x-auto scrollbar-hide" sx={{ top: 48 }}>
         <TabProgressBar value={value} labels={labels} />
         <Divider sx={{ display: { xs: 'block', md: 'none' }, my: 1 }} />
       </Box>
 
-      {/* Tab Content */}
-      <Box
-        sx={{
-          width: '100%',
-          maxWidth: TAB_CONTAINER_WIDTH,
-          mx: 'auto',
-          px: { xs: 0, sm: 2, md: 4 },
-        }}
-      >
+      {/* Tab Content Panels */}
+      <Box className="flex-1 overflow-y-auto px-2 md:px-4" sx={{ width: '100%', maxWidth: TAB_CONTAINER_WIDTH, mx: 'auto' }}>
         <TabPanel value={value} index={0}>
-          <SearchSection searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSelectService={(name, id) => { setServiceType(name); setServiceTypeId(id); }} />
+          <SearchSection
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            onSelectService={(name, id) => {
+              setServiceType(name);
+              setServiceTypeId(id);
+            }}
+          />
         </TabPanel>
         <TabPanel value={value} index={1}>
           <DateTab selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
           {dateError && (
-          <Typography color="error" sx={{ mt: 2, textAlign: 'center' }}>
-            {dateError}
-          </Typography>
-        )}
+            <Typography color="error" sx={{ mt: 2, textAlign: 'center' }}>
+              {dateError}
+            </Typography>
+          )}
         </TabPanel>
         <TabPanel value={value} index={2}>
-          {/* Validation message above title */}
           {descError && (
             <Typography color="error" sx={{ mb: 2, textAlign: 'center' }}>
               {descError}
@@ -412,29 +441,46 @@ const TabsControl: React.FC = () => {
             {error && <Typography>Error loading fixers</Typography>}
           </>
         </TabPanel>
-        <Box sx={{ display: 'flex', justifyContent: { xs: 'center', sm: 'flex-start' }, mt: 2, gap: 1 }}>
-          <Button variant="contained" color="primary" onClick={handlePrevious} disabled={value === 0}>
-            Previous
-          </Button>
-          {value < labels.length - 1 ? (
-            <Button
+        <TabPanel value={value} index={6}>
+        <AvailableFixersTab
+          fixersTabHeading={fixersTabHeading}
+          isLoading={isLoading}
+          error={error}
+          fixers={fixers}
+          previewData={previewData}
+          clientId="client-id"
+          snackbarOpen={snackbarOpen}
+          snackbarMsg={snackbarMsg}
+          snackbarSeverity={snackbarSeverity}
+          setSnackbarOpen={setSnackbarOpen}
+        />
+      </TabPanel>
+      </Box>
+
+      {/* Navigation Buttons fixed at the bottom */}
+      <Box className="sticky bottom-0 z-10 bg-white py-2 flex justify-center gap-2 border-t">
+        <Button variant="contained" color="primary" onClick={handlePrevious} disabled={value === 0}>
+          Previous
+        </Button>
+        {value < labels.length - 2 ? (
+          <Button
             variant="contained"
             color="primary"
             onClick={handleNext}
             disabled={value === 0 && (!serviceType || serviceType.trim() === '') ||
-            (value === 1 && (!!dateError || !selectedDate)) ||
-            (value === 2 && (!isValidText(title, 5) || !isValidText(description, 20)))
+              (value === 1 && (!!dateError || !selectedDate)) ||
+              (value === 2 && (!isValidText(title, 5) || !isValidText(description, 20)))
             }
-            >
-              Next
-            </Button>
-          ) : (
-            <Button variant="contained" color="primary" onClick={handleFindFixers}>
-              Find Fixers Now
-            </Button>
-          )}
-        </Box>
+          >
+            Next
+          </Button>
+        ) : value === labels.length - 2 ? (
+          <Button variant="contained" color="primary" onClick={handleFindFixers}>
+            Find Fixers Now
+          </Button>
+        ) : null}
       </Box>
+      {/* Hide scrollbars for custom scrollable areas */}
       <style>
         {`
           .hide-scrollbar::-webkit-scrollbar,
