@@ -34,7 +34,7 @@ const TabProgressBar: React.FC<TabProgressBarProps> = ({ value, labels }) => {
 
   return (
     <Box
-      className="overflow-x-auto scrollbar-hide w-full"
+      className="overflow-x-auto scrollbar-hide w-full px-4"
       sx={{
         backgroundColor: 'white',
         position: 'sticky',
