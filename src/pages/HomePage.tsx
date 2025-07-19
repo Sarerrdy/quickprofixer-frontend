@@ -7,12 +7,19 @@ import Footer from '../components/layout/Footer';
 import TabsControl from '../components/tab/TabsControl';
 
 const HomePage: React.FC = () => {
+  const [serviceType, setServiceType] = React.useState<string>('');
+  const [serviceTypeId, setServiceTypeId] = React.useState<number | null>(null);
+
   return (
     <div>
       <Header />
       <HeroSection />
-	    <TabsControl />
-      <ServicesSection />
+      <TabsControl />
+      <ServicesSection
+        serviceType={serviceType}
+        setServiceType={setServiceType}
+        setServiceTypeId={setServiceTypeId} // if needed
+      />
       <TestimonialsSection />
       <Footer />
     </div>
