@@ -15,12 +15,15 @@ const HomePage: React.FC = () => {
       <Header />
       <HeroSection />
       <TabsControl />
-      <ServicesSection
+      <br />
+      <br />
+      {/* Uncomment the ServicesSection when ready to use */}
+      {/* <ServicesSection
         serviceType={serviceType}
         setServiceType={setServiceType}
         setServiceTypeId={setServiceTypeId} // if needed
-      />
-      <TestimonialsSection />
+      /> */}
+      {/* <TestimonialsSection /> */}
       <Footer />
     </div>
   );

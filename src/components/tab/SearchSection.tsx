@@ -71,7 +71,7 @@ const SearchSection: React.FC<SearchSectionProps> = ({ searchTerm, setSearchTerm
         <p style={{ color: 'red', marginTop: '2rem', textAlign: 'center' }}>
           Please select a service before proceeding.
         </p>
-      )}      npm install @mui/material@6.5.0 @mui/icons-material@6.5.0 --legacy-peer-deps
+      )}      
       <div className="flex flex-col items-center mt-8 relative w-full">
         <input
           ref={inputRef}
