@@ -1,0 +1,210 @@
+FixerDto
+public string Id { get; set; }
+public string FirstName { get; set; }
+public string MiddleName { get; set; }
+public string LastName { get; set; }
+public string Email { get; set; }
+public string PhoneNumber { get; set; }
+public int AddressId { get; set; }
+public AddressDto Address { get; set; }
+public string? ImgUrl { get; set; }
+public int SpecializationId { get; set; }
+public string SpecializationName { get; set; }
+public string? Certifications { get; set; }
+public string VerificationDocument { get; set; }
+public bool IsVerified { get; set; }
+public double Rating { get; set; }
+public string Location { get; set; }
+public bool IsAvailable { get; set; }
+public string Reviews { get; set; }
+public int ExperienceYears { get; set; }
+public string Portfolio { get; set; }
+public string RateType { get; set; }
+public decimal Rate { get; set; }
+
+
+...........................
+
+FixRequestDto
+public int Id { get; set; }
+public string JobDescription { get; set; }
+public int SpecializationId { get; set; }
+public ServiceDto? Specialization { get; set; }
+public int AddressId { get; set; }
+public AddressDto? Address { get; set; }
+public string Location { get; set; }
+public DateTime PreferredSchedule { get; set; }
+public List<string> FixerIds { get; set; }
+public string ClientId { get; set; }
+public string Status { get; set; }
+public SupportingFileDto? SupportingImage { get; set; }
+public SupportingFileDto? SupportingDocument { get; set; }
+public List<string> SupportingFiles { get; set; }
+
+
+...................................
+
+BookingDto
+
+public int Id { get; set; }
+public string? ClientId { get; set; }
+public string? FixerId { get; set; }
+public int? QuoteId { get; set; }
+public DateTime BookingDate { get; set; }
+public string? Status { get; set; }
+
+................................
+QuoteDto
+public int Id { get; set; }
+public int FixRequestId { get; set; }
+public string FixerId { get; set; }
+public string ClientId { get; set; }
+public string Description { get; set; }
+public decimal Amount { get; set; }
+public DateTime CreatedAt { get; set; }
+public List<QuoteItemDto> Items { get; set; }
+public SupportingFileDto? SupportingImage { get; set; }
+public SupportingFileDto? SupportingDocument { get; set; }
+public List<string> SupportingFiles { get; set; }
+
+..........................
+QuoteItemDto
+
+public int Id { get; set; }
+public int QuoteId { get; set; }
+public string Name { get; set; }
+public int Quantity { get; set; }
+public decimal UnitPrice { get; set; }
+public decimal Price { get; }
+
+...............................
+FixerRatingDto
+public int Id { get; set; }
+public string? ClientId { get; set; }
+public string? FixerId { get; set; }
+public int Rating { get; set; }
+public string? Review { get; set; }
+public DateTime CreatedAt { get; set; }
+
+........................
+PaymentDto
+
+public int Id { get; set; }
+public string? ClientId { get; set; }
+public string? FixerId { get; set; }
+public int BookingId { get; set; }
+public decimal Amount { get; set; }
+public string ClientPaymentStatus { get; set; }
+public string FixerPaymentStatus { get; set; }
+public DateTime CreatedAt { get; set; }
+
+............................
+InvoiceDto
+public int Id { get; set; }
+public string? ClientId { get; set; }
+public string? FixerId { get; set; }
+public int BookingId { get; set; }
+public decimal Amount { get; set; }
+public DateTime CreatedAt { get; set; }
+public string InvoiceNumber { get; set; }
+
+........................
+NotificationDto (suggested fields, not defined in your code)
+
+public int Id { get; set; }
+public string UserId { get; set; }
+public string Title { get; set; }
+public string Message { get; set; }
+public string Type { get; set; }
+public bool IsRead { get; set; }
+public DateTime CreatedAt { get; set; }
+public string? RelatedEntityId { get; set; }
+
+.........................
+ServiceDto
+public int Id { get; set; }
+public string Name { get; set; }
+
+......................
+AddressDto
+
+public int Id { get; set; }
+public string AddressLine { get; set; }
+public string? Landmark { get; set; }
+public string Town { get; set; }
+public string LGA { get; set; }
+public string State { get; set; }
+public string? ZipCode { get; set; }
+public string Country { get; set; }
+
+..............................
+SupportingFileDto
+
+public int Id { get; set; }
+public string FileName { get; set; }
+public string FileType { get; set; }
+public string FileUrl { get; set; }
+
+............................
+ProfileDto
+public int Id { get; set; }
+public string FirstName { get; set; }
+public string LastName { get; set; }
+public string Email { get; set; }
+public string PhoneNumber { get; set; }
+public int AddressId { get; set; }
+public AddressDto Address { get; set; }
+public bool IsFixer { get; set; }
+
+.......................................
+ChatMessageDto (suggested fields, not defined in your code)
+public int Id { get; set; }
+public string SenderId { get; set; }
+public string ReceiverId { get; set; }
+public string Message { get; set; }
+public DateTime SentAt { get; set; }
+public bool IsRead { get; set; }
+public int? RelatedFixRequestId { get; set; }
+
+...........................
+AdminAnalyticsDto
+
+public int TotalUsers { get; set; }
+public int TotalFixers { get; set; }
+public int TotalClients { get; set; }
+public int TotalBookings { get; set; }
+public decimal TotalPayments { get; set; }
+
+..........................
+
+ApprovalResponseDto
+public string Message { get; set; }
+
+.........................................
+ClientDto
+public string Id { get; set; }
+public string FirstName { get; set; }
+public string MiddleName { get; set; }
+public string LastName { get; set; }
+public string Email { get; set; }
+public string PhoneNumber { get; set; }
+public int AddressId { get; set; }
+public AddressDto Address { get; set; }
+public string? ImgUrl { get; set; }
+public bool IsVerified { get; set; }
+public string VerificationDocument { get; set; }
+public string Reviews { get; set; }
+public int ExperienceYears { get; set; }
+public string Portfolio { get; set; }
+
+........................
+ClientRatingDto
+public int Id { get; set; }
+public string? ClientId { get; set; }
+public string? FixerId { get; set; }
+public int Rating { get; set; }
+public string? Review { get; set; }
+public DateTime CreatedAt { get; set; }
+
+
+

@@ -82,7 +82,7 @@ const FixerCard: React.FC<FixerCardProps> = ({ fixer, clientId, previewData }) =
       setSnackbarSeverity('success');
       setSnackbarOpen(true);
       const timeout = setTimeout(() => {
-        navigate('./dashboardPage');
+        navigate('./dashboard/client');
       }, 4000);
       return () => clearTimeout(timeout);
     }
