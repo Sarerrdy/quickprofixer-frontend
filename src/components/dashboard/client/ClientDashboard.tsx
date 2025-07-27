@@ -2,15 +2,17 @@ import React from 'react';
 import DashboardLayout from '../shared/DashboardLayout';
 import { Tabs, Tab, Box } from '@mui/material';
 import ClientOverview from './ClientOverview';
-import FixRequestsPanel from './FixRequestsPanel';
+import FixRequestList from './FixRequestList';
 import PendingRequestList from './PendingRequestList';
 import FixRequestDetails from './FixRequestDetails';
+import RequestListTab from './FixRequestTab';
 import { sample } from "../../../sample";
+import FixRequestTab from './FixRequestTab';
 
 const mainTabs = [
   'Overview',
   'Fix Requests',
-  'Bookings & Fixes',
+  'Bookings',
   'Quotes',
   'Payments & Invoices',
   'Messages',
@@ -18,7 +20,7 @@ const mainTabs = [
   'Account',
 ];
 
-const fixRequestSubTabs = ['Sent Requests', 'Pending'];
+const fixRequestSubTabs = ['Fix Requests'];
 const bookingsSubTabs = ['In Progress', 'Completed', 'Rejected'];
 const quotesSubTabs = ['Received', 'Details'];
 const paymentsSubTabs = ['Payments', 'Invoices'];
@@ -27,6 +29,7 @@ const accountSubTabs = ['Profile', 'Notifications', 'Settings'];
 
 const SubTabPanel: React.FC<{ tabs: string[]; children: (idx: number) => React.ReactNode }> = ({ tabs, children }) => {
   const [subTab, setSubTab] = React.useState(0);
+  const badges: { label: string; onRemove: () => void }[] = []; // <-- Populate this from your filter state
   return (
     <Box
       sx={{
@@ -60,8 +63,15 @@ const SubTabPanel: React.FC<{ tabs: string[]; children: (idx: number) => React.R
   );
 };
 
+const filterRequestsByFixerStatus = (status: string) => {
+  return sample.fixRequests.filter(req =>
+    req.fixerStatuses?.some((fs: any) => fs.status === status)
+  );
+};
+
 const ClientDashboard: React.FC<{ userType: 'client' }> = ({ userType }) => {
-  // State for viewing details of a pending request
+  // State for viewing details of sent and pending requests
+  const [selectedSent, setSelectedSent] = React.useState<any>(null);
   const [selectedPending, setSelectedPending] = React.useState<any>(null);
 
   return (
@@ -71,32 +81,8 @@ const ClientDashboard: React.FC<{ userType: 'client' }> = ({ userType }) => {
           case 0:
             return <ClientOverview />;
           case 1:
-            return (
-              <SubTabPanel tabs={fixRequestSubTabs}>
-                {(subTab) => {
-                  switch (subTab) {
-                    case 0:
-                      return <FixRequestsPanel requests={sample.fixRequests} title="Sent Fix Requests" />;
-                    case 1:
-                      // Pending requests only, with details view
-                      return selectedPending ? (
-                        <FixRequestDetails
-                          request={selectedPending}
-                          onBack={() => setSelectedPending(null)}
-                        />
-                      ) : (
-                        <PendingRequestList
-                          requests={sample.fixRequests.filter(r => r.status === 'Pending')}
-                          onViewDetails={setSelectedPending}
-                          title="Pending Requests"
-                        />
-                      );
-                    default:
-                      return null;
-                  }
-                }}
-              </SubTabPanel>
-            );
+            return <FixRequestTab />;
+
           case 2:
             return (
               <SubTabPanel tabs={bookingsSubTabs}>

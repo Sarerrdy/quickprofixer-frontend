@@ -1,0 +1,176 @@
+import React, { useEffect } from "react";
+import { Box, Typography, Stack, Divider, Paper } from "@mui/material";
+import FixRequestDetails from "./FixRequestDetails";
+import RequestSelectDropdown from "./RequestSelectDropdown";
+import RequestFilters from "./RequestFilters";
+import FilterBadgesBar from "./FilterBadgesBar";
+import { sample } from "../../../sample";
+import LatestRequestsGrid from "./LatestRequestsGrid";
+import { REQUEST_STATUSES } from "../shared/statuses";
+import RequestSummaryBar from "../shared/RequestSummaryBar";
+
+const FixRequestTab: React.FC = () => {
+  const [selectedRequestId, setSelectedRequestId] = React.useState<string | number | null>(null);
+  const [serviceType, setServiceType] = React.useState("");
+  const [status, setStatus] = React.useState("");
+  const [dateFrom, setDateFrom] = React.useState("");
+  const [dateTo, setDateTo] = React.useState("");
+
+  // Get all requests ordered by date
+  const allRequests = [...sample.fixRequests].sort(
+    (a, b) => new Date(b.preferredSchedule).getTime() - new Date(a.preferredSchedule).getTime()
+  );
+
+  // Unique service types for filter dropdown
+  const serviceTypes = Array.from(new Set(allRequests.map((r) => r.specialization?.name).filter(Boolean)));
+  // Use shared statuses constant for dropdown
+  const statuses = REQUEST_STATUSES;
+
+  // Filter logic (only main request status)
+  const filteredRequests = allRequests.filter((req) => {
+    const matchesService =
+      serviceType === "" || req.specialization?.name === serviceType;
+    const matchesStatus =
+      status === "" || req.status === status;
+    const matchesDate =
+      (!dateFrom || new Date(req.preferredSchedule) >= new Date(dateFrom)) &&
+      (!dateTo || new Date(req.preferredSchedule) <= new Date(dateTo));
+    return matchesService && matchesStatus && matchesDate;
+  });
+
+  const selectedRequest = allRequests.find((r) => r.id === selectedRequestId);
+
+  // Build badges array from filter state
+  const badges: { label: string; onRemove: () => void }[] = [];
+  if (serviceType)
+    badges.push({
+      label: serviceType,
+      onRemove: () => setServiceType(""),
+    });
+  if (status)
+    badges.push({
+      label: status,
+      onRemove: () => setStatus(""),
+    });
+  if (dateFrom)
+    badges.push({
+      label: `From: ${dateFrom}`,
+      onRemove: () => setDateFrom(""),
+    });
+  if (dateTo)
+    badges.push({
+      label: `To: ${dateTo}`,
+      onRemove: () => setDateTo(""),
+    });
+
+  // If the selected request is no longer in filteredRequests, close the details page
+  useEffect(() => {
+    if (
+      selectedRequestId &&
+      !filteredRequests.some((req) => req.id === selectedRequestId)
+    ) {
+      setSelectedRequestId(null);
+    }
+  }, [filteredRequests, selectedRequestId]);
+
+  return (
+    <Box sx={{ width: "100%", maxWidth: "100%", mx: "auto", py: 3, position: "relative" }}>
+      <Paper
+        elevation={0} // Removed elevation
+        sx={{
+          p: { xs: 2, md: 3 },
+          borderRadius: 3,
+          mb: 3,
+          bgcolor: "#f8fafc",
+          boxShadow: "none", // Removed shadow
+        }}
+      >
+        <Typography variant="h4" fontWeight={700} mb={2} sx={{ letterSpacing: 0.5 }}>
+          Fix Requests
+        </Typography>
+        <Divider sx={{ mb: 2 }} />
+
+        {/* Summary bar */}
+        <Box sx={{ mb: 2 }}>
+          <RequestSummaryBar allRequests={allRequests} serviceTypes={serviceTypes} />
+        </Box>
+
+        {/* Filter bar */}
+        <Box sx={{ mb: 2 }}>
+          <FilterBadgesBar badges={badges} />
+        </Box>
+
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={2}
+          mb={3}
+          sx={{
+            alignItems: { sm: "center" },
+            flexWrap: "wrap",
+            gap: { xs: 2, sm: 3 },
+          }}
+        >
+          <RequestSelectDropdown
+            requests={filteredRequests}
+            selectedRequestId={selectedRequestId}
+            onSelect={setSelectedRequestId}
+          />
+          <RequestFilters
+            serviceTypes={serviceTypes}
+            statuses={statuses}
+            serviceType={serviceType}
+            status={status}
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+            setServiceType={setServiceType}
+            setStatus={setStatus}
+            setDateFrom={setDateFrom}
+            setDateTo={setDateTo}
+            onClear={() => {
+              setServiceType("");
+              setStatus("");
+              setDateFrom("");
+              setDateTo("");
+              setSelectedRequestId(null);
+            }}
+          />
+        </Stack>
+      </Paper>
+
+      {/* Details & Latest Requests */}
+      <Paper
+        elevation={0} // Removed elevation
+        sx={{
+          mt: 2,
+          p: { xs: 2, md: 3 },
+          bgcolor: "#fafbfc",
+          borderRadius: 3,
+          border: "1px solid #e6e8eb",
+          boxShadow: "none", // Removed shadow
+          transition: "none",
+        }}
+      >
+        <Typography variant="subtitle1" fontWeight={600} mb={2} sx={{ letterSpacing: 0.2 }}>
+          Latest Requests
+        </Typography>
+        <LatestRequestsGrid
+          requests={filteredRequests}
+          onSelect={setSelectedRequestId}
+          selectedRequestId={selectedRequestId}
+          maxVisible={6}
+        />
+        {/* Removed Divider for smoother connection */}
+        <Box sx={{ mt: 2, transition: "none", bgcolor: "#fafbfc", borderRadius: 0 }}>
+          {selectedRequest ? (
+            <FixRequestDetails request={selectedRequest} onBack={() => setSelectedRequestId(null)} />
+          ) : (
+            <Typography color="text.secondary" fontSize={14} sx={{ textAlign: "center", py: 2 }}>
+					  No request selected. Please choose a request from the list above to view its details here.
+					</Typography>
+				  )}
+				</Box>		
+      </Paper>
+    </Box>
+  );
+};
+export default FixRequestTab;

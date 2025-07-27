@@ -141,10 +141,11 @@ export const sample = {
       rate: 15000,
     },
   ],
-  fixRequests: [
+   fixRequests: [
     {
       id: 101,
-      jobDescription: "Fix leaking kitchen sink",
+      title: "Fix leaking kitchen sink",
+      jobDescription: `The kitchen sink has developed a persistent leak that is causing water to pool under the cabinet. The leak appears to be coming from the pipe connection beneath the sink. Please inspect the plumbing, replace any faulty parts, and ensure the area is dry and secure after repair.`,
       specializationId: 1,
       specialization: { id: 1, name: "Plumbing" },
       addressId: 1,
@@ -159,9 +160,12 @@ export const sample = {
       },
       location: "Ikeja, Lagos",
       preferredSchedule: "2024-07-25T10:00:00Z",
-      fixerIds: ["fixer-001"],
+      fixerStatuses: [
+        { fixerId: "fixer-001", status: "Accepted" },
+        { fixerId: "fixer-002", status: "Accepted" }
+      ],
       clientId: "client-001",
-      status: "Pending",
+      status: "Booked", // Example: derived status
       supportingImage: {
         id: 1,
         fileName: "sink.jpg",
@@ -191,7 +195,8 @@ export const sample = {
     },
     {
       id: 102,
-      jobDescription: "Electrical wiring check",
+      title: "Electrical wiring check",
+      jobDescription: `There have been occasional sparks and flickering lights in the living room and kitchen. The wiring may be old or damaged. Please conduct a thorough inspection, repair any faulty wires, and ensure all electrical points are safe and compliant.`,
       specializationId: 2,
       specialization: { id: 2, name: "Electrical" },
       addressId: 2,
@@ -206,7 +211,10 @@ export const sample = {
       },
       location: "Yaba, Lagos",
       preferredSchedule: "2024-07-28T14:00:00Z",
-      fixerIds: ["fixer-002"],
+      fixerStatuses: [
+        { fixerId: "fixer-002", status: "Acceted" },
+        { fixerId: "fixer-001", status: "Rejected" }
+      ],
       clientId: "client-002",
       status: "Completed",
       supportingImage: {
@@ -232,7 +240,8 @@ export const sample = {
     },
     {
       id: 103,
-      jobDescription: "Install new water heater",
+      title: "Install new water heater",
+      jobDescription: `A new water heater needs to be installed in the bathroom. The old unit has been removed, and the new heater is ready for setup. Please handle all plumbing and electrical connections, test the heater for proper operation, and provide a brief usage guide.`,
       specializationId: 1,
       specialization: { id: 1, name: "Plumbing" },
       addressId: 3,
@@ -247,9 +256,12 @@ export const sample = {
       },
       location: "Surulere, Lagos",
       preferredSchedule: "2024-07-30T09:00:00Z",
-      fixerIds: ["fixer-001"],
+      fixerStatuses: [
+        { fixerId: "fixer-001", status: "Pending" },
+        { fixerId: "fixer-002", status: "Rejected" }
+      ],
       clientId: "client-003",
-      status: "In Progress",
+      status: "Pending",
       supportingImage: {
         id: 8,
         fileName: "heater.jpg",
