@@ -70,10 +70,9 @@ const FixRequestDetails: React.FC<{ request: any; onBack: () => void }> = ({
   };
 
   return (
-    <Paper
-      elevation={4}
+    <Box      
       sx={{
-        p: { xs: 2, md: 4 },
+        p: { xs: 2, md: 1 },
         borderRadius: 4,
         maxWidth: 1100,
         mx: "auto",
@@ -84,13 +83,15 @@ const FixRequestDetails: React.FC<{ request: any; onBack: () => void }> = ({
         <IconButton
           onClick={onBack}
           aria-label="Close details"
-          size="large"
+          size="small"
           sx={{
             bgcolor: "#fee2e2",
             color: "#b91c1c",
             "&:hover": { bgcolor: "#fecaca" },
             borderRadius: 2,
-            boxShadow: 1,
+            boxShadow: "none",
+            width: 28,
+            height: 28,
           }}
         >
           <CloseIcon fontSize="medium" />
@@ -454,7 +455,7 @@ const FixRequestDetails: React.FC<{ request: any; onBack: () => void }> = ({
           )}
         </Grid>
       </Grid>
-    </Paper>
+    </Box>
   );
 };
 

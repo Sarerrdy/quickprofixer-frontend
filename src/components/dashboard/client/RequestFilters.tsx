@@ -29,7 +29,6 @@ const RequestFilters: React.FC<{
 }) => {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  
 
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -65,9 +64,16 @@ const RequestFilters: React.FC<{
         <span className={`ml-auto ${isActive ? "text-gray-700" : "text-gray-400"}`}>▼</span>
       </button>
       {open && (
-        <div className="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-20 p-3 flex flex-col gap-3
-          sm:max-w-xs w-full
-        ">
+        <div
+          className="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-50 p-3 flex flex-col gap-3 sm:max-w-xs w-full"
+          style={{
+            maxHeight: "80vh",
+            overflowY: "auto",
+            // Ensure dropdown is always visible on small screens
+            bottom: 0,
+            top: "unset",
+          }}
+        >
           <select
             className={`bg-transparent outline-none text-sm px-2 py-2 border border-gray-200 rounded-md focus:border-gray-600 transition w-full cursor-pointer
               focus:bg-gray-100 focus:text-gray-900
