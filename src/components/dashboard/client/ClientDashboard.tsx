@@ -2,16 +2,17 @@ import React from 'react';
 import DashboardLayout from '../shared/DashboardLayout';
 import { Tabs, Tab, Box } from '@mui/material';
 import ClientOverview from './ClientOverview';
-import FixRequestList from './FixRequestList';
-import PendingRequestList from './PendingRequestList';
-import FixRequestDetails from './FixRequestDetails';
-import RequestListTab from './FixRequestTab';
-import { sample } from "../../../sample";
-import FixRequestTab from './FixRequestTab';
+import FixList from '../shared/FixList';
+import FixDetails from '../shared/FixDetails';
+import RequestListTab from './RequestTab';
+// import { sample } from "../../../sample";
+import RequestTab from './RequestTab';
+import { Book } from '@mui/icons-material';
+import BookingTab from './BookingTab';
 
 const mainTabs = [
   'Overview',
-  'Fix Requests',
+  'Requests',
   'Bookings',
   'Quotes',
   'Payments & Invoices',
@@ -20,12 +21,13 @@ const mainTabs = [
   'Account',
 ];
 
-const fixRequestSubTabs = ['Fix Requests'];
+const fixRequestSubTabs = ['Requests'];
 const bookingsSubTabs = ['In Progress', 'Completed', 'Rejected'];
 const quotesSubTabs = ['Received', 'Details'];
 const paymentsSubTabs = ['Payments', 'Invoices'];
 const ratingsSubTabs = ['My Ratings', 'My Reviews'];
 const accountSubTabs = ['Profile', 'Notifications', 'Settings'];
+
 
 const SubTabPanel: React.FC<{ tabs: string[]; children: (idx: number) => React.ReactNode }> = ({ tabs, children }) => {
   const [subTab, setSubTab] = React.useState(0);
@@ -63,11 +65,11 @@ const SubTabPanel: React.FC<{ tabs: string[]; children: (idx: number) => React.R
   );
 };
 
-const filterRequestsByFixerStatus = (status: string) => {
-  return sample.fixRequests.filter(req =>
-    req.fixerStatuses?.some((fs: any) => fs.status === status)
-  );
-};
+// const filterRequestsByFixerStatus = (status: string) => {
+//   return sample.fixRequests.filter(req =>
+//     req.fixerStatuses?.some((fs: any) => fs.status === status)
+//   );
+// };
 
 const ClientDashboard: React.FC<{ userType: 'client' }> = ({ userType }) => {
   // State for viewing details of sent and pending requests
@@ -81,25 +83,17 @@ const ClientDashboard: React.FC<{ userType: 'client' }> = ({ userType }) => {
           case 0:
             return <ClientOverview />;
           case 1:
-            return <FixRequestTab />;
+            return <RequestTab />;
+            // return <FixTab type="request" />;
 
           case 2:
             return (
-              <SubTabPanel tabs={bookingsSubTabs}>
-                {(subTab) => {
-                  switch (subTab) {
-                    case 0:
-                      return <div>Fixes In Progress</div>;
-                    case 1:
-                      return <div>Completed Fixes</div>;
-                    case 2:
-                      return <div>Rejected Fixes</div>;
-                    default:
-                      return null;
-                  }
-                }}
-              </SubTabPanel>
-            );
+              <BookingTab />
+                // <SubTabPanel tabs={bookingsSubTabs}>
+                //   {(subTab) => <FixTab type="booking" subTab={subTab} />}
+                //   {/* {(subTab) => <FixTab type="booking" subTab={subTab} />} */}
+                // </SubTabPanel>
+              );
           case 3:
             return (
               <SubTabPanel tabs={quotesSubTabs}>

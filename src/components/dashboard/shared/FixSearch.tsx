@@ -1,8 +1,8 @@
 import React, { useRef } from "react";
 import { Search as SearchIcon } from "@mui/icons-material";
-import FixRequestList from "./FixRequestList";
+import FixList from "./FixList";
 
-const RequestSelectDropdown: React.FC<{
+const FixSearch: React.FC<{
   requests: any[];
   selectedRequestId: string | number | null;
   onSelect: (id: string | number | null) => void;
@@ -62,7 +62,7 @@ const RequestSelectDropdown: React.FC<{
       </div>
       {open && (
         <div className="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-20 max-h-72 overflow-y-auto">
-          <FixRequestList
+          <FixList
             requests={filtered}
             onViewDetails={(req) => {
               onSelect(req.id);
@@ -77,4 +77,4 @@ const RequestSelectDropdown: React.FC<{
   );
 };
 
-export default RequestSelectDropdown;
+export default FixSearch;

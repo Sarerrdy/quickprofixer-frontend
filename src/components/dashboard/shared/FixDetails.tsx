@@ -5,7 +5,6 @@ import {
   Typography,
   IconButton,
   Divider,
-  Paper,
   Grid,
   Chip,
   Tooltip,
@@ -18,7 +17,7 @@ import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import ImageIcon from "@mui/icons-material/Image";
 import DownloadIcon from "@mui/icons-material/Download";
 
-const FixRequestDetails: React.FC<{ request: any; onBack: () => void }> = ({
+const FixDetails: React.FC<{ request: any; onBack: () => void }> = ({
   request,
   onBack,
 }) => {
@@ -32,7 +31,7 @@ const FixRequestDetails: React.FC<{ request: any; onBack: () => void }> = ({
     : "No address provided";
 
   // Gather all resources (images, documents, files, links)
- const images: any[] = [];
+  const images: any[] = [];
   if (request.supportingImage) images.push(request.supportingImage);
   if (Array.isArray(request.supportingImages)) images.push(...request.supportingImages);
   if (Array.isArray(request.supportingFiles)) {
@@ -41,7 +40,7 @@ const FixRequestDetails: React.FC<{ request: any; onBack: () => void }> = ({
     ));
   }
 
-   const documents: any[] = [];
+  const documents: any[] = [];
   if (request.supportingDocument) documents.push(request.supportingDocument);
   if (Array.isArray(request.supportingDocuments)) documents.push(...request.supportingDocuments);
   if (Array.isArray(request.supportingFiles)) {
@@ -59,6 +58,19 @@ const FixRequestDetails: React.FC<{ request: any; onBack: () => void }> = ({
 
   const links = Array.isArray(request.supportingLinks) ? request.supportingLinks : [];
 
+  
+  // Booked fixers: Only fixers with status "Booked" (for requests)
+  const bookedFixers =
+    Array.isArray(request.fixerStatuses)
+      ? request.fixerStatuses.filter((fs: any) => fs.status === "Booked")
+      : [];
+
+  // For bookings, get the fixerId as the booked fixer (if present)
+  const bookedFixerIds =
+    request.bookingDate && request.fixerId
+      ? [request.fixerId]
+      : [];
+
   // Handlers for image viewer
   const handleThumbnailClick = (img: any) => {
     setViewerImg(img);
@@ -70,7 +82,7 @@ const FixRequestDetails: React.FC<{ request: any; onBack: () => void }> = ({
   };
 
   return (
-    <Box      
+    <Box
       sx={{
         p: { xs: 2, md: 1 },
         borderRadius: 4,
@@ -103,7 +115,7 @@ const FixRequestDetails: React.FC<{ request: any; onBack: () => void }> = ({
       <Grid container spacing={3}>
         {/* Left Column */}
         <Grid item xs={12} md={7}>
-          {/* Status Section */}
+          {/* Request Status Section */}
           <Box sx={{ mb: 2, display: "flex", alignItems: "center", gap: 2 }}>
             <Typography
               variant="subtitle1"
@@ -114,7 +126,7 @@ const FixRequestDetails: React.FC<{ request: any; onBack: () => void }> = ({
                 letterSpacing: 0.5,
               }}
             >
-              Status:
+              Request status:
             </Typography>
             <Box>
               <Chip
@@ -145,7 +157,63 @@ const FixRequestDetails: React.FC<{ request: any; onBack: () => void }> = ({
             </Box>
           </Box>
 
-           {/* Description Section */}
+          {/* Booking Status Section (only if bookingStatus exists) */}
+          {"bookingStatus" in request && (
+            <Box sx={{ mb: 2, display: "flex", alignItems: "center", gap: 2 }}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  fontWeight: 700,
+                  fontSize: "1.1rem",
+                  color: "#6366f1",
+                  letterSpacing: 0.5,
+                }}
+              >
+                Booking status:
+              </Typography>
+              <Box>
+                <Chip
+                  label={request.bookingStatus || "No status"}
+                  color={
+                    request.bookingStatus === "Completed"
+                      ? "success"
+                      : request.bookingStatus === "Rejected"
+                      ? "error"
+                      : request.bookingStatus === "Pending"
+                      ? "warning"
+                      : request.bookingStatus === "Booked"
+                      ? "primary"
+                      : request.bookingStatus === "In Progress"
+                      ? "info"
+                      : "default"
+                  }
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: "1rem",
+                    px: 2,
+                    py: 1,
+                    borderRadius: 2,
+                    minWidth: 90,
+                    textTransform: "capitalize",
+                  }}
+                />
+              </Box>
+            </Box>
+          )}
+
+          {/* Booking Date Section (only if bookingDate exists) */}
+          {"bookingDate" in request && request.bookingDate && (
+            <Box sx={{ mb: 1 }}>
+              <Typography variant="body2" sx={{ color: "#6366f1", fontWeight: 600 }}>
+                Booking Date:
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                {new Date(request.bookingDate).toLocaleDateString()}
+              </Typography>
+            </Box>
+          )}
+
+          {/* Description Section */}
           <Box sx={{ mb: 2 }}>
             <Typography variant="body2" sx={{ color: "#6366f1", fontWeight: 600 }}>
               Description:
@@ -168,7 +236,7 @@ const FixRequestDetails: React.FC<{ request: any; onBack: () => void }> = ({
           {/* Date Section */}
           <Box sx={{ mb: 1 }}>
             <Typography variant="body2" sx={{ color: "#6366f1", fontWeight: 600 }}>
-              Date:
+              Request Date:
             </Typography>
             <Typography variant="body2" sx={{ mb: 1 }}>
               {request.preferredSchedule
@@ -194,7 +262,7 @@ const FixRequestDetails: React.FC<{ request: any; onBack: () => void }> = ({
             </Typography>
             <Typography variant="body2">{address}</Typography>
           </Box>
-          <Divider sx={{ my: 2 }} />         
+          <Divider sx={{ my: 2 }} />
 
           {/* Resources Section */}
           <Box sx={{ mb: 2 }}>
@@ -345,9 +413,10 @@ const FixRequestDetails: React.FC<{ request: any; onBack: () => void }> = ({
           </Box>
           <Divider sx={{ my: 2 }} />
 
+          {/* Requested Fixers Section */}
           <Box sx={{ mb: 2 }}>
             <Typography variant="body2" fontWeight={600} sx={{ color: "#6366f1", mb: 1 }}>
-              Assigned Fixers:
+              Requested Fixers:
             </Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2 }}>
               {Array.isArray(request.fixerStatuses) && request.fixerStatuses.length > 0
@@ -361,6 +430,8 @@ const FixRequestDetails: React.FC<{ request: any; onBack: () => void }> = ({
                           ? "success"
                           : fs.status === "Rejected"
                           ? "error"
+                          : fs.status === "Booked"
+                          ? "primary"
                           : "default"
                       }
                     />
@@ -370,6 +441,41 @@ const FixRequestDetails: React.FC<{ request: any; onBack: () => void }> = ({
                 )}
             </Box>
           </Box>
+
+        {/* Booked Fixers Section */}
+
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="body2" fontWeight={600} sx={{ color: "#6366f1", mb: 1 }}>
+            Booked Fixers:
+          </Typography>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2 }}>
+            {/* For bookings: show fixerId(s) */}
+            {bookedFixerIds.length > 0 ? (
+              bookedFixerIds.map((id: string, idx: number) => (
+                <Chip
+                  key={id || idx}
+                  label={id}
+                  size="small"
+                  color="primary"
+                />
+              ))
+            ) : bookedFixers.length > 0 ? (
+              // For requests: show fixers with status "Booked"
+              bookedFixers.map((fs: any, idx: number) => (
+                <Chip
+                  key={fs.fixerId || idx}
+                  label={`${fs.fixerId} (${fs.status})`}
+                  size="small"
+                  color="primary"
+                />
+              ))
+            ) : (
+              <Typography color="text.secondary">None</Typography>
+            )}
+          </Box>
+          {/* Optionally, show more details if you have them */}
+        </Box>
+         
         </Grid>
 
         {/* Right Column */}
@@ -459,4 +565,4 @@ const FixRequestDetails: React.FC<{ request: any; onBack: () => void }> = ({
   );
 };
 
-export default FixRequestDetails;
+export default FixDetails;

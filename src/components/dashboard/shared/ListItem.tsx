@@ -8,7 +8,7 @@ type RequestItemProps = {
   selected?: boolean;
 };
 
-const RequestItem: React.FC<RequestItemProps> = ({ title, date, onClick, selected }) => (
+const ListItem: React.FC<RequestItemProps> = ({ title, date, onClick, selected }) => (
   <Box
     sx={{
       display: "inline-flex",
@@ -61,4 +61,4 @@ const RequestItem: React.FC<RequestItemProps> = ({ title, date, onClick, selecte
   </Box>
 );
 
-export default RequestItem;
+export default ListItem;

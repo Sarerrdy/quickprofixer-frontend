@@ -1,8 +1,7 @@
 import React, { useRef, useState } from "react";
-import { FilterAlt as FilterIcon } from "@mui/icons-material";
-import { REQUEST_STATUSES } from "../shared/statuses";
+// Remove any import of FIX_STATUSES or BOOKING_STATUSES here!
 
-const RequestFilters: React.FC<{
+interface FixFiltersProps {
   serviceTypes: string[];
   statuses: string[];
   serviceType: string;
@@ -14,7 +13,10 @@ const RequestFilters: React.FC<{
   setDateFrom: (v: string) => void;
   setDateTo: (v: string) => void;
   onClear: () => void;
-}> = ({
+  type?: "request" | "booking";
+}
+
+const FixFilters: React.FC<FixFiltersProps> = ({
   serviceTypes,
   statuses,
   serviceType,
@@ -26,6 +28,7 @@ const RequestFilters: React.FC<{
   setDateFrom,
   setDateTo,
   onClear,
+  type = "request",
 }) => {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -50,6 +53,12 @@ const RequestFilters: React.FC<{
   const isActive =
     !!serviceType || !!status || !!dateFrom || !!dateTo;
 
+  // Filter statuses for booking: omit "Booked"
+  const filteredStatuses =
+    type === "booking"
+      ? statuses.filter((s) => s !== "Booked")
+      : statuses;
+
   return (
     <div ref={containerRef} className="relative w-full max-w-md">
       <button
@@ -59,7 +68,6 @@ const RequestFilters: React.FC<{
         `}
         onClick={() => setOpen((prev) => !prev)}
       >
-        <FilterIcon fontSize="small" className={`mr-2 ${isActive ? "text-gray-700" : "text-gray-400"}`} />
         <span className={`text-sm font-semibold ${isActive ? "text-gray-900" : "text-gray-700"}`}>Filters</span>
         <span className={`ml-auto ${isActive ? "text-gray-700" : "text-gray-400"}`}>▼</span>
       </button>
@@ -69,7 +77,6 @@ const RequestFilters: React.FC<{
           style={{
             maxHeight: "80vh",
             overflowY: "auto",
-            // Ensure dropdown is always visible on small screens
             bottom: 0,
             top: "unset",
           }}
@@ -99,7 +106,7 @@ const RequestFilters: React.FC<{
             onBlur={e => e.target.classList.remove("ring-2", "ring-gray-400")}
           >
             <option value="">All Statuses</option>
-            {REQUEST_STATUSES.map(s => (
+            {filteredStatuses.map(s => (
               <option key={s} value={s}>{s}</option>
             ))}
           </select>
@@ -146,4 +153,4 @@ const RequestFilters: React.FC<{
   );
 };
 
-export default RequestFilters;
+export default FixFilters;

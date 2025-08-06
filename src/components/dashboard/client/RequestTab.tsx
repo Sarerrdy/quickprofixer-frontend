@@ -1,22 +1,22 @@
-// ...existing imports...
 import React, { useEffect, useState } from "react";
-import { Box, Typography, Stack, Divider, Paper } from "@mui/material";
-import FixRequestDetails from "./FixRequestDetails";
-import RequestSelectDropdown from "./RequestSelectDropdown";
-import RequestFilters from "./RequestFilters";
-import FilterBadgesBar from "./FilterBadgesBar";
+import { Box, Typography, Stack, Divider } from "@mui/material";
+import FixDetails from "../shared/FixDetails";
+import FixSearch from "../shared/FixSearch";
+import FixFilters from "../shared/FixFilters";
+import FilterBadgesBar from "../shared/FilterBadgesBar";
 import { sample } from "../../../sample";
-import LatestRequestsGrid from "./LatestRequestsGrid";
-import { REQUEST_STATUSES } from "../shared/statuses";
-import RequestSummaryBar from "../shared/RequestSummaryBar";
+import FixGrid from "../shared/FixGrid";
+import { FIX_STATUSES } from "../shared/FixStatuses";
+import FixSummaryBar from "../shared/FixSummaryBar";
+import FixFilterBar from "../shared/FixFilterBar";
 
-const FixRequestTab: React.FC = () => {
+const RequestTab: React.FC = () => {
   const [selectedRequestId, setSelectedRequestId] = useState<string | number | null>(null);
   const [serviceType, setServiceType] = useState("");
   const [status, setStatus] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
-  const [visibleCount, setVisibleCount] = useState(5); // For gradual loading
+  const [visibleCount, setVisibleCount] = useState(5);
 
   // Get all requests ordered by date
   const allRequests = [...sample.fixRequests].sort(
@@ -25,10 +25,9 @@ const FixRequestTab: React.FC = () => {
 
   // Unique service types for filter dropdown
   const serviceTypes = Array.from(new Set(allRequests.map((r) => r.specialization?.name).filter(Boolean)));
-  // Use shared statuses constant for dropdown
-  const statuses = REQUEST_STATUSES;
+  const statuses = FIX_STATUSES;
 
-  // Filter logic (only main request status)
+  // Filter logic
   const filteredRequests = allRequests.filter((req) => {
     const matchesService =
       serviceType === "" || req.specialization?.name === serviceType;
@@ -73,92 +72,79 @@ const FixRequestTab: React.FC = () => {
     ) {
       setSelectedRequestId(null);
     }
-    // Reset visibleCount if filters change
     setVisibleCount(5);
   }, [serviceType, status, dateFrom, dateTo]);
 
   return (
     <Box sx={{ width: "100%", maxWidth: "100%", mx: "auto", py: 3, position: "relative" }}>
       {/* Group 1: Fix Requests Title & Summary */}
-      <Box        
+      <Box
         sx={{
           p: { xs: 2, md: 3 },
           borderRadius: 3,
           mb: 3,
           bgcolor: "#f8fafc",
           boxShadow: "none",
-        //   border: "1px solid #e8eaee", // very thin, subtle shade of background
         }}
       >
         <Typography variant="h4" fontWeight={700} mb={2} sx={{ letterSpacing: 0.5 }}>
           Fix Requests
         </Typography>
         <Divider sx={{ mb: 2 }} />
-        <RequestSummaryBar allRequests={allRequests} serviceTypes={serviceTypes} />
+        <FixSummaryBar
+          allRequests={allRequests}
+          serviceTypes={serviceTypes}
+          type="request"
+        />
       </Box>
 
       {/* Group 2: Filters, Dropdown, and Badges */}
-      <Box       
-        sx={{
-          p: { xs: 2, md: 3 },
-          borderRadius: 3,
-          mb: 3,
-          bgcolor: "#f8fafc",
-          boxShadow: "none",
-        //   border: "1px solid #e8eaee", // very thin, subtle shade of background
-        }}
-      >
-        <Typography variant="subtitle1" fontWeight={600} mb={2} sx={{ letterSpacing: 0.2 }}>
-          Search requests..
-        </Typography>
-        <Divider sx={{ mb: 2 }} />
-        <FilterBadgesBar badges={badges} />
-        <Stack
-          direction={{ xs: "column", sm: "row" }}
-          spacing={2}
-          mb={2}
-          sx={{
-            alignItems: { sm: "center" },
-            flexWrap: "wrap",
-            gap: { xs: 2, sm: 3 },
-          }}
-        >
-          <RequestSelectDropdown
-            requests={filteredRequests}
-            selectedRequestId={selectedRequestId}
-            onSelect={setSelectedRequestId}
-          />
-          <RequestFilters
-            serviceTypes={serviceTypes}
-            statuses={statuses}
-            serviceType={serviceType}
-            status={status}
-            dateFrom={dateFrom}
-            dateTo={dateTo}
-            setServiceType={setServiceType}
-            setStatus={setStatus}
-            setDateFrom={setDateFrom}
-            setDateTo={setDateTo}
-            onClear={() => {
-              setServiceType("");
-              setStatus("");
-              setDateFrom("");
-              setDateTo("");
-              setSelectedRequestId(null);
-            }}
-          />
-        </Stack>      
-      </Box>
+     <Box
+  sx={{
+    p: { xs: 2, md: 3 },
+    borderRadius: 3,
+    mb: 3,
+    bgcolor: "#f8fafc",
+    boxShadow: "none",
+  }}
+>
+  <Typography variant="subtitle1" fontWeight={600} mb={2} sx={{ letterSpacing: 0.2 }}>
+    Search requests..
+  </Typography>
+  <Divider sx={{ mb: 2 }} />
+  <FixFilterBar
+    badges={badges}
+    requests={filteredRequests}
+    selectedRequestId={selectedRequestId}
+    onSelect={setSelectedRequestId}
+    serviceTypes={serviceTypes}
+    statuses={statuses}
+    serviceType={serviceType}
+    status={status}
+    dateFrom={dateFrom}
+    dateTo={dateTo}
+    setServiceType={setServiceType}
+    setStatus={setStatus}
+    setDateFrom={setDateFrom}
+    setDateTo={setDateTo}
+    onClear={() => {
+      setServiceType("");
+      setStatus("");
+      setDateFrom("");
+      setDateTo("");
+      setSelectedRequestId(null);
+    }}
+  />
+</Box>
 
       {/* Group 3: Latest Requests List */}
-      <Box        
+      <Box
         sx={{
           p: { xs: 2, md: 3 },
           borderRadius: 3,
           mb: 3,
           bgcolor: "#fafbfc",
           boxShadow: "none",
-          // Add a thin border if you want: border: "1px solid #eceff1",
         }}
       >
         <Typography variant="subtitle1" fontWeight={600} mb={2} sx={{ letterSpacing: 0.2 }}>
@@ -167,16 +153,15 @@ const FixRequestTab: React.FC = () => {
         <Divider sx={{ mb: 2 }} />
         <Box
           sx={{
-            maxHeight: { xs: 340, sm: 400 }, // max height for mobile and up
+            maxHeight: { xs: 340, sm: 400 },
             overflowY: "auto",
-            pr: 1, // space for scrollbar
+            pr: 1,
           }}
         >
-          <LatestRequestsGrid
+          <FixGrid
             requests={filteredRequests.slice(0, visibleCount)}
             onSelect={setSelectedRequestId}
             selectedRequestId={selectedRequestId}
-            // maxVisible={visibleCount}
           />
         </Box>
         {visibleCount < filteredRequests.length && (
@@ -208,18 +193,17 @@ const FixRequestTab: React.FC = () => {
             borderRadius: 3,
             mb: 3,
             bgcolor: "#fafbfc",
-            // No border, no shadow, no elevation
           }}
         >
           <Typography variant="subtitle1" fontWeight={600} mb={2} sx={{ letterSpacing: 0.2 }}>
             Request Details...
           </Typography>
           <Divider sx={{ mb: 1 }} />
-          <FixRequestDetails request={selectedRequest} onBack={() => setSelectedRequestId(null)} />
+          <FixDetails request={selectedRequest} onBack={() => setSelectedRequestId(null)} />
         </Box>
       )}
     </Box>
   );
 };
 
-export default FixRequestTab;
+export default RequestTab;

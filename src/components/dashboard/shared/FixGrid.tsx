@@ -1,6 +1,6 @@
 import React from "react";
 import { Box } from "@mui/material";
-import RequestItem from "./RequestItem";
+import ListItem from "./ListItem";
 
 type Request = {
   id: string | number;
@@ -16,7 +16,7 @@ interface LatestRequestsGridProps {
   maxVisible?: number;
 }
 
-const LatestRequestsGrid: React.FC<LatestRequestsGridProps> = ({
+const FixGrid: React.FC<LatestRequestsGridProps> = ({
   requests,
   onSelect,
   selectedRequestId,
@@ -31,7 +31,7 @@ const LatestRequestsGrid: React.FC<LatestRequestsGridProps> = ({
         }}
       >
         {requests.map((req) => (
-          <RequestItem
+          <ListItem
             key={req.id}
             title={req.title || "No description"}
             date={
@@ -48,4 +48,4 @@ const LatestRequestsGrid: React.FC<LatestRequestsGridProps> = ({
   );
 };
 
-export default LatestRequestsGrid;
+export default FixGrid;

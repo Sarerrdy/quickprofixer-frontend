@@ -8,7 +8,7 @@ import { Box, Paper, Typography } from "@mui/material";
  * @param title Section title
  * @param selectedId Optional: id of the currently focused/selected item
  */
-const FixRequestList: React.FC<{
+const FixList: React.FC<{
   requests: any[];
   onViewDetails: (req: any) => void;
   title: string;
@@ -61,4 +61,4 @@ const FixRequestList: React.FC<{
   </Box>
 );
 
-export default FixRequestList;
+export default FixList;
