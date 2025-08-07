@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Typography, Tabs, Tab, IconButton, Drawer, useMediaQuery } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close'; // <-- Add this import
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import BookIcon from '@mui/icons-material/Book';
@@ -43,19 +44,23 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ userType, tabs, child
     if (isSmDown) {
       return (
         <>
-          <IconButton
-            onClick={() => setDrawerOpen(true)}
-            sx={{
-              position: 'fixed',
-              top: 24,
-              left: 24,
-              zIndex: 1300,
-              bgcolor: '#fff',
-              boxShadow: 1,
-            }}
-          >
-            <MenuIcon />
-          </IconButton>
+          {/* Hide hamburger when drawer is open */}
+          {!drawerOpen && (
+            <IconButton
+              onClick={() => setDrawerOpen(true)}
+              sx={{
+                position: 'fixed',
+                top: 64, // Push down so it doesn't cover the app title
+                left: 24,
+                zIndex: 1300,
+                bgcolor: '#fff',
+                boxShadow: 1,
+              }}
+              aria-label="Open sidebar"
+            >
+              <MenuIcon />
+            </IconButton>
+          )}
           <Drawer
             anchor="left"
             open={drawerOpen}
@@ -64,6 +69,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ userType, tabs, child
               sx: { minWidth: 200, bgcolor: '#fff', borderRadius: 2, p: 2 },
             }}
           >
+            {/* Close button inside Drawer */}
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+              <IconButton onClick={() => setDrawerOpen(false)} aria-label="Close sidebar">
+                <CloseIcon /> {/* Use X icon for close */}
+              </IconButton>
+            </Box>
             <Typography variant="h6" fontWeight={700} sx={{ px: 2, mb: 2 }}>
               {userType === 'fixer' ? 'Fixer Dashboard' : 'Client Dashboard'}
             </Typography>

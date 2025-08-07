@@ -1,21 +1,23 @@
 import React, { useState } from "react";
 import {
   Box,
-  Link,
   Typography,
   IconButton,
   Divider,
   Grid,
-  Chip,
-  Tooltip,
-  Button,
-  Dialog,
-  DialogContent,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import ImageIcon from "@mui/icons-material/Image";
-import DownloadIcon from "@mui/icons-material/Download";
+import SubmittedQuotes from "./SubmittedQuotes";
+import { sample } from "../../../sample";
+
+// --- Extracted Components ---
+import FixDetailsStatus from "./FixDetails/FixDetailsStatus";
+import FixDetailsPhotos from "./FixDetails/FixDetailsPhotos";
+import FixDetailsDocuments from "./FixDetails/FixDetailsDocuments";
+import FixDetailsLinks from "./FixDetails/FixDetailsLinks";
+import { RequestedFixers, BookedFixers } from "./FixDetails/FixerChipsList";
+import FixDetailsImageViewer from "./FixDetails/FixDetailsImageViewer";
+// ----------------------------
 
 const FixDetails: React.FC<{ request: any; onBack: () => void }> = ({
   request,
@@ -58,7 +60,6 @@ const FixDetails: React.FC<{ request: any; onBack: () => void }> = ({
 
   const links = Array.isArray(request.supportingLinks) ? request.supportingLinks : [];
 
-  
   // Booked fixers: Only fixers with status "Booked" (for requests)
   const bookedFixers =
     Array.isArray(request.fixerStatuses)
@@ -115,105 +116,14 @@ const FixDetails: React.FC<{ request: any; onBack: () => void }> = ({
       <Grid container spacing={3}>
         {/* Left Column */}
         <Grid item xs={12} md={7}>
-          {/* Request Status Section */}
-          <Box sx={{ mb: 2, display: "flex", alignItems: "center", gap: 2 }}>
-            <Typography
-              variant="subtitle1"
-              sx={{
-                fontWeight: 700,
-                fontSize: "1.1rem",
-                color: "#6366f1",
-                letterSpacing: 0.5,
-              }}
-            >
-              Request status:
-            </Typography>
-            <Box>
-              <Chip
-                label={request.status || "No status"}
-                color={
-                  request.status === "Completed"
-                    ? "success"
-                    : request.status === "Rejected"
-                    ? "error"
-                    : request.status === "Pending"
-                    ? "warning"
-                    : request.status === "Booked"
-                    ? "primary"
-                    : request.status === "In Progress"
-                    ? "info"
-                    : "default"
-                }
-                sx={{
-                  fontWeight: 700,
-                  fontSize: "1rem",
-                  px: 2,
-                  py: 1,
-                  borderRadius: 2,
-                  minWidth: 90,
-                  textTransform: "capitalize",
-                }}
-              />
-            </Box>
-          </Box>
+          {/* Status, Booking, and Description */}
+          <FixDetailsStatus
+            status={request.status}
+            bookingStatus={request.bookingStatus}
+            bookingDate={request.bookingDate}
+          />
 
-          {/* Booking Status Section (only if bookingStatus exists) */}
-          {"bookingStatus" in request && (
-            <Box sx={{ mb: 2, display: "flex", alignItems: "center", gap: 2 }}>
-              <Typography
-                variant="subtitle1"
-                sx={{
-                  fontWeight: 700,
-                  fontSize: "1.1rem",
-                  color: "#6366f1",
-                  letterSpacing: 0.5,
-                }}
-              >
-                Booking status:
-              </Typography>
-              <Box>
-                <Chip
-                  label={request.bookingStatus || "No status"}
-                  color={
-                    request.bookingStatus === "Completed"
-                      ? "success"
-                      : request.bookingStatus === "Rejected"
-                      ? "error"
-                      : request.bookingStatus === "Pending"
-                      ? "warning"
-                      : request.bookingStatus === "Booked"
-                      ? "primary"
-                      : request.bookingStatus === "In Progress"
-                      ? "info"
-                      : "default"
-                  }
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: "1rem",
-                    px: 2,
-                    py: 1,
-                    borderRadius: 2,
-                    minWidth: 90,
-                    textTransform: "capitalize",
-                  }}
-                />
-              </Box>
-            </Box>
-          )}
-
-          {/* Booking Date Section (only if bookingDate exists) */}
-          {"bookingDate" in request && request.bookingDate && (
-            <Box sx={{ mb: 1 }}>
-              <Typography variant="body2" sx={{ color: "#6366f1", fontWeight: 600 }}>
-                Booking Date:
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                {new Date(request.bookingDate).toLocaleDateString()}
-              </Typography>
-            </Box>
-          )}
-
-          {/* Description Section */}
+          {/* Description */}
           <Box sx={{ mb: 2 }}>
             <Typography variant="body2" sx={{ color: "#6366f1", fontWeight: 600 }}>
               Description:
@@ -224,7 +134,7 @@ const FixDetails: React.FC<{ request: any; onBack: () => void }> = ({
           </Box>
           <Divider sx={{ my: 2 }} />
 
-          {/* Specialization Section */}
+          {/* Specialization */}
           <Box sx={{ mb: 1 }}>
             <Typography variant="body2" sx={{ color: "#6366f1", fontWeight: 600 }}>
               Specialization:
@@ -233,7 +143,7 @@ const FixDetails: React.FC<{ request: any; onBack: () => void }> = ({
               {request.specialization?.name || "No specialization"}
             </Typography>
           </Box>
-          {/* Date Section */}
+          {/* Date */}
           <Box sx={{ mb: 1 }}>
             <Typography variant="body2" sx={{ color: "#6366f1", fontWeight: 600 }}>
               Request Date:
@@ -244,7 +154,7 @@ const FixDetails: React.FC<{ request: any; onBack: () => void }> = ({
                 : "No date"}
             </Typography>
           </Box>
-          {/* Location Section */}
+          {/* Location */}
           <Box sx={{ mb: 1 }}>
             <Typography variant="body2" sx={{ color: "#6366f1", fontWeight: 600 }}>
               Location:
@@ -255,7 +165,7 @@ const FixDetails: React.FC<{ request: any; onBack: () => void }> = ({
           </Box>
           <Divider sx={{ my: 2 }} />
 
-          {/* Address Section */}
+          {/* Address */}
           <Box sx={{ mb: 2 }}>
             <Typography variant="body2" sx={{ color: "#6366f1", fontWeight: 600 }}>
               Address:
@@ -264,267 +174,38 @@ const FixDetails: React.FC<{ request: any; onBack: () => void }> = ({
           </Box>
           <Divider sx={{ my: 2 }} />
 
-          {/* Resources Section */}
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="body2" fontWeight={600} sx={{ color: "#6366f1", mb: 1 }}>
-              Photos:
-            </Typography>
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mb: 2 }}>
-              {images.length > 0 ? (
-                images.map((img: any, idx: number) => (
-                  <Tooltip key={idx} title={img.fileName || "Image"}>
-                    <Box
-                      sx={{
-                        width: 80,
-                        height: 80,
-                        borderRadius: 2,
-                        overflow: "hidden",
-                        boxShadow: 1,
-                        bgcolor: "#f3f4f6",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor: "pointer",
-                        position: "relative",
-                      }}
-                      onClick={() => handleThumbnailClick(img)}
-                    >
-                      <img
-                        src={img.fileUrl}
-                        alt={img.fileName || "Photo"}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
-                        onError={(e) => (e.currentTarget.style.display = "none")}
-                      />
-                      <Button
-                        href={img.fileUrl}
-                        download={img.fileName}
-                        size="small"
-                        sx={{
-                          position: "absolute",
-                          bottom: 4,
-                          right: 4,
-                          minWidth: 0,
-                          p: "2px",
-                          bgcolor: "#fff",
-                          borderRadius: "50%",
-                          boxShadow: 1,
-                        }}
-                        onClick={e => e.stopPropagation()}
-                      >
-                        <DownloadIcon sx={{ fontSize: 18, color: "#6366f1" }} />
-                      </Button>
-                    </Box>
-                  </Tooltip>
-                ))
-              ) : (
-                <Typography color="text.secondary" sx={{ mb: 2 }}>
-                  No supporting images uploaded
-                </Typography>
-              )}
-            </Box>
-          </Box>
+          {/* Resources */}
+          <FixDetailsPhotos images={images} onImageClick={handleThumbnailClick} />
+          <Divider sx={{ my: 2 }} />
+          <FixDetailsDocuments documents={documents} />
+          <Divider sx={{ my: 2 }} />
+          <FixDetailsLinks links={links} />
           <Divider sx={{ my: 2 }} />
 
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="body2" fontWeight={600} sx={{ color: "#6366f1", mb: 1 }}>
-              Documents:
-            </Typography>
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mb: 2 }}>
-              {documents.length > 0 ? (
-                documents.map((doc: any, idx: number) => (
-                  <Tooltip key={idx} title={doc.fileName || "Document"}>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1,
-                        bgcolor: "#f9fafb",
-                        borderRadius: 1,
-                        px: 1,
-                        py: 0.5,
-                        minWidth: 120,
-                        maxWidth: 180,
-                      }}
-                    >
-                      <InsertDriveFileIcon sx={{ color: "#6366f1", fontSize: 28, mr: 1 }} />
-                      <Link
-                        href={doc.fileUrl}
-                        target="_blank"
-                        rel="noopener"
-                        underline="hover"
-                        sx={{ fontSize: 13, wordBreak: "break-all" }}
-                      >
-                        {doc.fileName || "Document"}
-                      </Link>
-                      <Button
-                        href={doc.fileUrl}
-                        download={doc.fileName}
-                        size="small"
-                        sx={{
-                          minWidth: 0,
-                          p: "2px",
-                          bgcolor: "#fff",
-                          borderRadius: "50%",
-                          boxShadow: 1,
-                        }}
-                      >
-                        <DownloadIcon sx={{ fontSize: 18, color: "#6366f1" }} />
-                      </Button>
-                    </Box>
-                  </Tooltip>
-                ))
-              ) : (
-                <Typography color="text.secondary" sx={{ mb: 2 }}>
-                  No supporting documents uploaded
-                </Typography>
-              )}
-            </Box>
-          </Box>
+          {/* Requested & Booked Fixers */}
+          <RequestedFixers fixerStatuses={request.fixerStatuses} />
+          <BookedFixers bookedFixerIds={bookedFixerIds} bookedFixers={bookedFixers} />
+
+          {/* Submitted Quotes */}
           <Divider sx={{ my: 2 }} />
-
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="body2" fontWeight={600} sx={{ color: "#6366f1", mb: 1 }}>
-              Links:
-            </Typography>
-            {links.length > 0 ? (
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mb: 2 }}>
-                {links.map((lnk: any, idx: number) => (
-                  <Link
-                    key={idx}
-                    href={lnk.url}
-                    target="_blank"
-                    rel="noopener"
-                    underline="hover"
-                    sx={{ fontSize: 13 }}
-                  >
-                    {lnk.label || lnk.url}
-                  </Link>
-                ))}
-              </Box>
-            ) : (
-              <Typography color="text.secondary" sx={{ mb: 2 }}>
-                No links attached
-              </Typography>
-            )}
-          </Box>
-          <Divider sx={{ my: 2 }} />
-
-          {/* Requested Fixers Section */}
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="body2" fontWeight={600} sx={{ color: "#6366f1", mb: 1 }}>
-              Requested Fixers:
-            </Typography>
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2 }}>
-              {Array.isArray(request.fixerStatuses) && request.fixerStatuses.length > 0
-                ? request.fixerStatuses.map((fs: any, idx: number) => (
-                    <Chip
-                      key={idx}
-                      label={`${fs.fixerId} (${fs.status})`}
-                      size="small"
-                      color={
-                        fs.status === "Accepted"
-                          ? "success"
-                          : fs.status === "Rejected"
-                          ? "error"
-                          : fs.status === "Booked"
-                          ? "primary"
-                          : "default"
-                      }
-                    />
-                  ))
-                : (
-                  <Typography color="text.secondary">None</Typography>
-                )}
-            </Box>
-          </Box>
-
-        {/* Booked Fixers Section */}
-
-        <Box sx={{ mb: 2 }}>
           <Typography variant="body2" fontWeight={600} sx={{ color: "#6366f1", mb: 1 }}>
-            Booked Fixers:
+            Submitted Quotes:
           </Typography>
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2 }}>
-            {/* For bookings: show fixerId(s) */}
-            {bookedFixerIds.length > 0 ? (
-              bookedFixerIds.map((id: string, idx: number) => (
-                <Chip
-                  key={id || idx}
-                  label={id}
-                  size="small"
-                  color="primary"
-                />
-              ))
-            ) : bookedFixers.length > 0 ? (
-              // For requests: show fixers with status "Booked"
-              bookedFixers.map((fs: any, idx: number) => (
-                <Chip
-                  key={fs.fixerId || idx}
-                  label={`${fs.fixerId} (${fs.status})`}
-                  size="small"
-                  color="primary"
-                />
-              ))
-            ) : (
-              <Typography color="text.secondary">None</Typography>
-            )}
+          <Box sx={{ mb: 2 }}>
+            <SubmittedQuotes fixRequestId={request.id} />
           </Box>
-          {/* Optionally, show more details if you have them */}
-        </Box>
-         
         </Grid>
 
         {/* Right Column */}
         <Grid item xs={12} md={5}>
-          {/* Large preview of selected image or first image if available */}
-          {viewerImg ? (
-            <Dialog open={viewerOpen} onClose={handleViewerClose} maxWidth="md">
-              <DialogContent sx={{ p: 0, position: "relative", bgcolor: "#111827" }}>
-                <Box sx={{ position: "absolute", top: 8, right: 8, zIndex: 2 }}>
-                  <IconButton
-                    onClick={handleViewerClose}
-                    sx={{
-                      bgcolor: "#fee2e2",
-                      color: "#b91c1c",
-                      "&:hover": { bgcolor: "#fecaca" },
-                      borderRadius: 2,
-                      boxShadow: 1,
-                    }}
-                  >
-                    <CloseIcon />
-                  </IconButton>
-                </Box>
-                <Box sx={{ textAlign: "center", p: 2 }}>
-                  <img
-                    src={viewerImg.fileUrl}
-                    alt={viewerImg.fileName || "Preview"}
-                    style={{
-                      maxWidth: "100%",
-                      maxHeight: "70vh",
-                      borderRadius: 12,
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
-                      background: "#111827",
-                    }}
-                  />
-                  <Box sx={{ mt: 2 }}>
-                    <Button
-                      href={viewerImg.fileUrl}
-                      download={viewerImg.fileName}
-                      variant="contained"
-                      color="primary"
-                      startIcon={<DownloadIcon />}
-                    >
-                      Download Image
-                    </Button>
-                  </Box>
-                </Box>
-              </DialogContent>
-            </Dialog>
-          ) : images.length > 0 ? (
+          {/* Large preview of selected image */}
+          <FixDetailsImageViewer
+            open={viewerOpen}
+            image={viewerImg}
+            onClose={handleViewerClose}
+          />
+          {/* Fallback preview if no viewer open */}
+          {!viewerOpen && images.length > 0 && (
             <Box sx={{ mb: 2, textAlign: { xs: "left", md: "center" }, cursor: "pointer" }}>
               <img
                 src={images[0].fileUrl}
@@ -538,22 +219,10 @@ const FixDetails: React.FC<{ request: any; onBack: () => void }> = ({
                 onClick={() => handleThumbnailClick(images[0])}
                 onError={(e) => (e.currentTarget.style.display = "none")}
               />
-              <Box sx={{ mt: 1 }}>
-                <Button
-                  href={images[0].fileUrl}
-                  download={images[0].fileName}
-                  size="small"
-                  variant="outlined"
-                  startIcon={<DownloadIcon />}
-                  sx={{ borderRadius: 2 }}
-                >
-                  Download
-                </Button>
-              </Box>
             </Box>
-          ) : (
+          )}
+          {!viewerOpen && images.length === 0 && (
             <Box sx={{ mb: 2, textAlign: { xs: "left", md: "center" } }}>
-              <ImageIcon sx={{ fontSize: 60, color: "#e0e7ef" }} />
               <Typography color="text.secondary" sx={{ mt: 1 }}>
                 No preview image
               </Typography>
