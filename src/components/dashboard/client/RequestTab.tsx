@@ -34,7 +34,7 @@ const RequestTab: React.FC = () => {
   // --- CRUD: Book Fixer ---
 const handleBookFixer = (fixerId: string) => {
   if (!selectedRequestId) return;
-  const req = fixRequests.find(r => r.id === selectedRequestId);
+  const req = fixRequests.find((r: any) => r.id === selectedRequestId);
   if (!req) return;
   // Persist to DAL: update fix request and add booking if needed
   bookFixerForRequest(selectedRequestId, fixerId, req.clientId);
