@@ -58,7 +58,7 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import SupportAgentIcon from "@mui/icons-material/SupportAgent";
 import PaymentIcon from "@mui/icons-material/Payment";
-import { sample } from "../../../sample";
+import { sample } from "../../../samp/sample";
 
 // Helper functions
 const getClient = (clientId: string) => sample.clients.find((c) => c.id === clientId);

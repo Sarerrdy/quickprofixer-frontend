@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Typography, Card, CardContent, Chip, Button, Grid } from "@mui/material";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import { sample } from "../../../sample";
+import { sample } from "../../../samp/sample";
 
 interface SubmittedQuotesProps {
   fixRequestId: number;

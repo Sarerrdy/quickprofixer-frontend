@@ -1,22 +1,33 @@
 import React, { useState } from "react";
 import { Box, Typography, Divider } from "@mui/material";
-import { sample } from "../../../sample";
 import FixSummaryBar from "../shared/FixSummaryBar";
 import FixFilterBar from "../shared/FixFilterBar";
-import FixGrid from "../shared/FixGrid"; // <-- Make sure this import exists and is correct
-import FixDetails from "../shared/FixDetails"; // <-- Add this import
+import FixGrid from "../shared/FixGrid";
+import FixDetails from "../shared/FixDetails";
+import { BOOKING_STATUSES } from "../shared/FixStatuses";
+import {
+  getAllBookings,
+  getAllFixRequests,
+  updateBooking,
+  updateFixerBookingStatus,
+  bookFixerForRequest,
+} from "../../../samp/sampleDAL";
 
 const BookingTab = () => {
-  // Prepare booking data merged with their related requests for summary
-  const bookingsWithRequest = sample.bookings
+  // Local state for bookings and fix requests (simulate CRUD)
+  const [bookings, setBookings] = useState(getAllBookings());
+  const [fixRequests, setFixRequests] = useState(getAllFixRequests());
+
+  // Merge bookings with their related requests for summary
+  const bookingsWithRequest = bookings
     .map((booking) => {
-      const req = sample.fixRequests.find((r) => r.id === booking.fixRequestId);
+      const req = fixRequests.find((r) => r.id === booking.fixRequestId);
       return req
         ? {
-            ...booking,
             ...req,
+            ...booking, // booking fields (including status) override request fields
             bookingDate: booking.bookingDate,
-            bookingStatus: booking.status,
+            bookingStatus: booking.status, // always use booking.status
           }
         : null;
     })
@@ -27,7 +38,7 @@ const BookingTab = () => {
     new Set(bookingsWithRequest.map((r) => r.specialization?.name).filter(Boolean))
   );
 
-  // Example filter state (you can expand as needed)
+  // Example filter state
   const [selectedBookingId, setSelectedBookingId] = useState<string | number | null>(null);
   const [serviceType, setServiceType] = useState("");
   const [status, setStatus] = useState("");
@@ -71,8 +82,8 @@ const BookingTab = () => {
       onRemove: () => setDateTo(""),
     });
 
-  // Booking statuses (you can import BOOKING_STATUSES if you have it)
-  const statuses = ["Pending", "In Progress", "Completed", "Rejected"];
+  // Booking statuses (excluding "Pending")
+  const bookingStatuses = BOOKING_STATUSES.filter(s => s !== "Pending");
 
   // Sort bookings by bookingDate (latest first)
   const sortedBookings = [...filteredBookings].sort(
@@ -81,6 +92,30 @@ const BookingTab = () => {
 
   // Find selected booking
   const selectedBooking = bookingsWithRequest.find((r) => r.id === selectedBookingId);
+
+  // --- CRUD: Update Booking Status ---
+  const handleBookingStatusChange = (fixerId: string, status: string) => {
+    const booking = bookings.find(b => b.fixerId === fixerId);
+    if (!booking) return;
+    // Persist to DAL
+    updateBooking(booking.id, { status });
+    updateFixerBookingStatus(booking.fixRequestId, fixerId, status);
+    // Refresh local state for live UI update
+    setBookings(getAllBookings());
+    setFixRequests(getAllFixRequests());
+  };
+
+  // --- CRUD: Book Fixer ---
+  const handleBookFixer = (fixerId: string) => {
+    if (!selectedBooking) return;
+    const req = fixRequests.find(r => r.id === selectedBooking.fixRequestId);
+    if (!req) return;
+    // Use your DAL to book the fixer
+    bookFixerForRequest(selectedBooking.fixRequestId, fixerId, req.clientId);
+    // Refresh local state for live UI update
+    setBookings(getAllBookings());
+    setFixRequests(getAllFixRequests());
+  };
 
   return (
     <Box sx={{ width: "100%", maxWidth: "100%", mx: "auto", py: 3, position: "relative" }}>
@@ -124,7 +159,7 @@ const BookingTab = () => {
           selectedRequestId={selectedBookingId}
           onSelect={setSelectedBookingId}
           serviceTypes={serviceTypes}
-          statuses={statuses}
+          statuses={BOOKING_STATUSES}
           serviceType={serviceType}
           status={status}
           dateFrom={dateFrom}
@@ -206,7 +241,14 @@ const BookingTab = () => {
             Booking Details...
           </Typography>
           <Divider sx={{ mb: 1 }} />
-          <FixDetails request={selectedBooking} onBack={() => setSelectedBookingId(null)} />
+           <FixDetails
+            request={selectedBooking}
+            onBack={() => setSelectedBookingId(null)}
+            bookingMode={true}
+            bookingStatuses={bookingStatuses}
+            onBookingStatusChange={handleBookingStatusChange}
+            onBookFixer={handleBookFixer}
+          />
         </Box>
       )}
     </Box>

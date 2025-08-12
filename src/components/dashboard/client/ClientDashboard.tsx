@@ -14,16 +14,13 @@ const mainTabs = [
   'Overview',
   'Requests',
   'Bookings',
-  'Quotes',
   'Payments & Invoices',
   'Messages',
   'Ratings & Reviews',
   'Account',
 ];
 
-const fixRequestSubTabs = ['Requests'];
-const bookingsSubTabs = ['In Progress', 'Completed', 'Rejected'];
-const quotesSubTabs = ['Received', 'Details'];
+
 const paymentsSubTabs = ['Payments', 'Invoices'];
 const ratingsSubTabs = ['My Ratings', 'My Reviews'];
 const accountSubTabs = ['Profile', 'Notifications', 'Settings'];
@@ -65,11 +62,7 @@ const SubTabPanel: React.FC<{ tabs: string[]; children: (idx: number) => React.R
   );
 };
 
-// const filterRequestsByFixerStatus = (status: string) => {
-//   return sample.fixRequests.filter(req =>
-//     req.fixerStatuses?.some((fs: any) => fs.status === status)
-//   );
-// };
+
 
 const ClientDashboard: React.FC<{ userType: 'client' }> = ({ userType }) => {
   // State for viewing details of sent and pending requests
@@ -88,28 +81,10 @@ const ClientDashboard: React.FC<{ userType: 'client' }> = ({ userType }) => {
 
           case 2:
             return (
-              <BookingTab />
-                // <SubTabPanel tabs={bookingsSubTabs}>
-                //   {(subTab) => <FixTab type="booking" subTab={subTab} />}
-                //   {/* {(subTab) => <FixTab type="booking" subTab={subTab} />} */}
-                // </SubTabPanel>
+              <BookingTab />                
               );
+         
           case 3:
-            return (
-              <SubTabPanel tabs={quotesSubTabs}>
-                {(subTab) => {
-                  switch (subTab) {
-                    case 0:
-                      return <div>Received Quotes</div>;
-                    case 1:
-                      return <div>Quote Details</div>;
-                    default:
-                      return null;
-                  }
-                }}
-              </SubTabPanel>
-            );
-          case 4:
             return (
               <SubTabPanel tabs={paymentsSubTabs}>
                 {(subTab) => {
@@ -124,9 +99,9 @@ const ClientDashboard: React.FC<{ userType: 'client' }> = ({ userType }) => {
                 }}
               </SubTabPanel>
             );
-          case 5:
+          case 4:
             return <div>Messages</div>;
-          case 6:
+          case 5:
             return (
               <SubTabPanel tabs={ratingsSubTabs}>
                 {(subTab) => {
@@ -141,7 +116,7 @@ const ClientDashboard: React.FC<{ userType: 'client' }> = ({ userType }) => {
                 }}
               </SubTabPanel>
             );
-          case 7:
+          case 6:
             return (
               <SubTabPanel tabs={accountSubTabs}>
                 {(subTab) => {

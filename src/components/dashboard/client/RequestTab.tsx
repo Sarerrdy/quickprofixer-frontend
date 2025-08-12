@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { Box, Typography, Stack, Divider } from "@mui/material";
+import { Box, Typography, Divider } from "@mui/material";
 import FixDetails from "../shared/FixDetails";
-import FixSearch from "../shared/FixSearch";
-import FixFilters from "../shared/FixFilters";
-import FilterBadgesBar from "../shared/FilterBadgesBar";
-import { sample } from "../../../sample";
 import FixGrid from "../shared/FixGrid";
 import { FIX_STATUSES } from "../shared/FixStatuses";
 import FixSummaryBar from "../shared/FixSummaryBar";
 import FixFilterBar from "../shared/FixFilterBar";
+import {
+  getAllFixRequests,
+  updateFixRequest,
+  updateFixerBookingStatus,
+   bookFixerForRequest,
+}
+from "../../../samp/sampleDAL";
+import { BOOKING_STATUSES } from "../shared/FixStatuses";
+
 
 const RequestTab: React.FC = () => {
   const [selectedRequestId, setSelectedRequestId] = useState<string | number | null>(null);
@@ -18,8 +23,29 @@ const RequestTab: React.FC = () => {
   const [dateTo, setDateTo] = useState("");
   const [visibleCount, setVisibleCount] = useState(5);
 
+  // Local state for requests (simulate CRUD)
+  // const [fixRequests, setFixRequests] = useState(getAllFixRequests());
+
+  // Local state for requests (simulate CRUD) - use localStorage for persistence
+    const stored = localStorage.getItem("fixRequests");
+    const [fixRequests, setFixRequests] = useState(
+      stored ? JSON.parse(stored) : getAllFixRequests()
+    );
+  // --- CRUD: Book Fixer ---
+const handleBookFixer = (fixerId: string) => {
+  if (!selectedRequestId) return;
+  const req = fixRequests.find(r => r.id === selectedRequestId);
+  if (!req) return;
+  // Persist to DAL: update fix request and add booking if needed
+  bookFixerForRequest(selectedRequestId, fixerId, req.clientId);
+  // Refresh local state for live UI update
+  const updated = getAllFixRequests();
+  setFixRequests(updated);
+  localStorage.setItem("fixRequests", JSON.stringify(updated));
+};
+
   // Get all requests ordered by date
-  const allRequests = [...sample.fixRequests].sort(
+  const allRequests = [...fixRequests].sort(
     (a, b) => new Date(b.preferredSchedule).getTime() - new Date(a.preferredSchedule).getTime()
   );
 
@@ -75,6 +101,17 @@ const RequestTab: React.FC = () => {
     setVisibleCount(5);
   }, [serviceType, status, dateFrom, dateTo]);
 
+  const bookingStatuses = BOOKING_STATUSES.filter(s => s !== "Pending");
+  
+// When updating booking status, also persist to localStorage
+const handleBookingStatusChange = (fixerId: string, status: string) => {
+  if (!selectedRequestId) return;
+  updateFixerBookingStatus(selectedRequestId, fixerId, status);
+  const updated = getAllFixRequests();
+  setFixRequests(updated);
+  localStorage.setItem("fixRequests", JSON.stringify(updated));
+};
+
   return (
     <Box sx={{ width: "100%", maxWidth: "100%", mx: "auto", py: 3, position: "relative" }}>
       {/* Group 1: Fix Requests Title & Summary */}
@@ -99,43 +136,43 @@ const RequestTab: React.FC = () => {
       </Box>
 
       {/* Group 2: Filters, Dropdown, and Badges */}
-     <Box
-  sx={{
-    p: { xs: 2, md: 3 },
-    borderRadius: 3,
-    mb: 3,
-    bgcolor: "#f8fafc",
-    boxShadow: "none",
-  }}
->
-  <Typography variant="subtitle1" fontWeight={600} mb={2} sx={{ letterSpacing: 0.2 }}>
-    Search requests..
-  </Typography>
-  <Divider sx={{ mb: 2 }} />
-  <FixFilterBar
-    badges={badges}
-    requests={filteredRequests}
-    selectedRequestId={selectedRequestId}
-    onSelect={setSelectedRequestId}
-    serviceTypes={serviceTypes}
-    statuses={statuses}
-    serviceType={serviceType}
-    status={status}
-    dateFrom={dateFrom}
-    dateTo={dateTo}
-    setServiceType={setServiceType}
-    setStatus={setStatus}
-    setDateFrom={setDateFrom}
-    setDateTo={setDateTo}
-    onClear={() => {
-      setServiceType("");
-      setStatus("");
-      setDateFrom("");
-      setDateTo("");
-      setSelectedRequestId(null);
-    }}
-  />
-</Box>
+      <Box
+        sx={{
+          p: { xs: 2, md: 3 },
+          borderRadius: 3,
+          mb: 3,
+          bgcolor: "#f8fafc",
+          boxShadow: "none",
+        }}
+      >
+        <Typography variant="subtitle1" fontWeight={600} mb={2} sx={{ letterSpacing: 0.2 }}>
+          Search requests..
+        </Typography>
+        <Divider sx={{ mb: 2 }} />
+        <FixFilterBar
+          badges={badges}
+          requests={filteredRequests}
+          selectedRequestId={selectedRequestId}
+          onSelect={setSelectedRequestId}
+          serviceTypes={serviceTypes}
+          statuses={statuses}
+          serviceType={serviceType}
+          status={status}
+          dateFrom={dateFrom}
+          dateTo={dateTo}
+          setServiceType={setServiceType}
+          setStatus={setStatus}
+          setDateFrom={setDateFrom}
+          setDateTo={setDateTo}
+          onClear={() => {
+            setServiceType("");
+            setStatus("");
+            setDateFrom("");
+            setDateTo("");
+            setSelectedRequestId(null);
+          }}
+        />
+      </Box>
 
       {/* Group 3: Latest Requests List */}
       <Box
@@ -199,7 +236,11 @@ const RequestTab: React.FC = () => {
             Request Details...
           </Typography>
           <Divider sx={{ mb: 1 }} />
-          <FixDetails request={selectedRequest} onBack={() => setSelectedRequestId(null)} />
+           <FixDetails
+            request={selectedRequest}
+            onBack={() => setSelectedRequestId(null)}
+            onBookFixer={handleBookFixer}
+          />
         </Box>
       )}
     </Box>

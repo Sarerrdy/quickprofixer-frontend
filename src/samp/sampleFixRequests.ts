@@ -113,10 +113,10 @@ export const sampleFixRequests = [
     location: "Yaba, Lagos",
     preferredSchedule: "2024-08-02T15:00:00Z",
     fixerStatuses: [
-      { fixerId: "fixer-002", status: "Booked" }
+      { fixerId: "fixer-002", status: "Pending" }
     ],
     clientId: "client-002",
-    status: "Booked",
+    status: "Pending",
     supportingImage: null,
     supportingDocument: null,
     supportingFiles: [],
@@ -161,7 +161,7 @@ export const sampleFixRequests = [
     location: "Ikeja, Lagos",
     preferredSchedule: "2024-08-04T08:00:00Z",
     fixerStatuses: [
-      { fixerId: "fixer-002", status: "Pending" }
+      { fixerId: "fixer-002", status: "Rejected" }
     ],
     clientId: "client-001",
     status: "Rejected",
@@ -257,7 +257,7 @@ export const sampleFixRequests = [
     location: "Yaba, Lagos",
     preferredSchedule: "2024-08-08T14:00:00Z",
     fixerStatuses: [
-      { fixerId: "fixer-001", status: "Pending" }
+      { fixerId: "fixer-001", status: "Accepted" }
     ],
     clientId: "client-002",
     status: "Pending",

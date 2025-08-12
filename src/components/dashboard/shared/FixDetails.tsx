@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import SubmittedQuotes from "./SubmittedQuotes";
-import { sample } from "../../../sample";
+import { sample } from "../../../samp/sample";
 
 // --- Extracted Components ---
 import FixDetailsStatus from "./FixDetails/FixDetailsStatus";
@@ -19,9 +19,22 @@ import { RequestedFixers, BookedFixers } from "./FixDetails/FixerChipsList";
 import FixDetailsImageViewer from "./FixDetails/FixDetailsImageViewer";
 // ----------------------------
 
-const FixDetails: React.FC<{ request: any; onBack: () => void }> = ({
+interface FixDetailsProps {
+  request: any;
+  onBack: () => void;
+  bookingMode?: boolean;
+  bookingStatuses?: string[];
+  onBookFixer?: (fixerId: string) => void;
+  onBookingStatusChange?: (fixerId: string, status: string) => void;
+}
+
+const FixDetails: React.FC<FixDetailsProps> = ({
   request,
   onBack,
+  bookingMode = false,
+  bookingStatuses = [],
+  onBookFixer,
+  onBookingStatusChange,
 }) => {
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerImg, setViewerImg] = useState<any>(null);
@@ -183,8 +196,19 @@ const FixDetails: React.FC<{ request: any; onBack: () => void }> = ({
           <Divider sx={{ my: 2 }} />
 
           {/* Requested & Booked Fixers */}
-          <RequestedFixers fixerStatuses={request.fixerStatuses} />
-          <BookedFixers bookedFixerIds={bookedFixerIds} bookedFixers={bookedFixers} />
+          <RequestedFixers
+            fixerStatuses={request.fixerStatuses}
+            onBookFixer={onBookFixer}
+          />
+            <BookedFixers
+            bookedFixerIds={request.fixerStatuses
+              .filter((fs: any) => fs.status === "Booked")
+              .map((fs: any) => fs.fixerId)}
+            bookedFixers={request.fixerStatuses.filter((fs: any) => fs.status === "Booked")}
+            bookingMode={bookingMode}
+            bookingStatuses={bookingStatuses}
+            onBookingStatusChange={onBookingStatusChange}
+          />
 
           {/* Submitted Quotes */}
           <Divider sx={{ my: 2 }} />
